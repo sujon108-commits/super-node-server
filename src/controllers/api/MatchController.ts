@@ -3,6 +3,9 @@ import { Request, Response } from "express";
 import r from "rethinkdb";
 import rethink from "../../database/rethinkdb";
 import { tables } from "../../utils/rethink-tables";
+import OddSocket from "../../sockets/OddSocket";
+import { IMarketType } from "../../models/MarketModel";
+import { IFancy } from "../../models/FancyModel";
 
 class MatchController {
   public static async addMatchAndMarket(
@@ -88,6 +91,7 @@ class MatchController {
           .then(async (res: any) => {
             console.log(res.data.sports);
             res.data.sports.map(async (fancy: any) => {
+              const fancyData = this.createFancyDataAsMarket(fancy);
               await r
                 .table(tables.fancies)
                 .insert(
@@ -140,6 +144,44 @@ class MatchController {
     } catch (e: Error | any) {
       return res.json(e.stack);
     }
+  }
+
+  public static createFancyDataAsMarket(data: IFancy) {
+    const layPriceKeys = Object.keys(data).filter((key) =>
+      key.startsWith("BackPrice")
+    );
+    const runners = [];
+    for (let i = 1; i <= layPriceKeys.length; i++) {
+      let back = {};
+      let lay = {};
+      if (data[`LayPrice${i}`] != undefined) {
+        lay = { price: data[`LayPrice${i}`], size: data[`LaySize${i}`] };
+      }
+      if (data[`BackPrice${i}`] != undefined) {
+        back = { price: data[`BackPrice${i}`], size: data[`BackSize${i}`] };
+      }
+      //Todo: I added only one runner if need 3 then will it to 3 with condition
+      if (i == 1)
+        runners.push({
+          lay,
+          back,
+          selectionId: data.SelectionId,
+          runnerName: "",
+          status: data.GameStatus,
+          sortPriority: i,
+        });
+    }
+
+    return {
+      marketName: data.RunnerName,
+      runners,
+      oddsType: IMarketType.F,
+      min: data.min,
+      max: data.max,
+      rem: data.rem,
+      sortPriority: data.sr_no,
+      fancyType: data.gtype,
+    };
   }
 }
 
