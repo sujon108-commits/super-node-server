@@ -91,7 +91,6 @@ class MatchController {
           .then(async (res: any) => {
             console.log(res.data.sports);
             res.data.sports.map(async (fancy: any) => {
-              const fancyData = this.createFancyDataAsMarket(fancy);
               await r
                 .table(tables.fancies)
                 .insert(

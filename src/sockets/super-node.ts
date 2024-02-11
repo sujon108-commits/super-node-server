@@ -2,6 +2,7 @@ import r from "rethinkdb";
 import { io } from "socket.io-client";
 import rethink from "../database/rethinkdb";
 import { tables } from "../utils/rethink-tables";
+import axios from "axios";
 
 const socket = io(process.env.SUPER_NODE_URL!, {
   transports: ["websocket"],
@@ -14,12 +15,12 @@ socket.on("connect", () => {
 });
 
 socket.on("newFancyAdded", (fancy) => {
-  // axios
-  //   .post(`${process.env.NEST_SERVER_URL}/sport/add-new-fancy`, {
-  //     ...fancy.fancy,
-  //     matchId: fancy.matchId,
-  //   })
-  //   .catch((e) => console.log("new", e.stack, e.response));
+  axios
+    .post(`${process.env.NEST_SERVER_URL}/sport/add-new-fancy`, {
+      ...fancy.fancy,
+      matchId: fancy.matchId,
+    })
+    .catch((e) => console.log("new", e.stack, e.response));
 });
 
 socket.on("deactivateFancy-Super", (fancy) => {
@@ -32,11 +33,11 @@ socket.on("deactivateFancy-Super", (fancy) => {
           .get(`${matchId}-${marketId}`)
           .delete()
           .run(await rethink);
-        // axios
-        //   .post(`${process.env.NEST_SERVER_URL}/sport/deactivate-fancy`, {
-        //     marketId: `${matchId}-${marketId}`,
-        //   })
-        //   .catch((e) => console.log("deac", e.stack));
+        axios
+          .post(`${process.env.NEST_SERVER_URL}/sport/deactivate-fancy`, {
+            marketId: `${matchId}-${marketId}`,
+          })
+          .catch((e) => console.log("deac", e.stack));
       });
     });
   }
@@ -69,7 +70,7 @@ socket.on("deactivateMarket-Super", async (marketData) => {
         .run(await rethink);
     }
     // axios
-    //   .post(`http://localhost:${process.env.PORT}/api/deactivate-market`, {
+    //   .post(`${process.env.NEST_SERVER_URL}/sport/deactivate-market`, {
     //     market: marketData,
     //   })
     //   .catch((e) => {
