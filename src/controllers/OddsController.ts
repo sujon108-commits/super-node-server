@@ -1,8 +1,7 @@
 import r from "rethinkdb";
-import { tables } from "../utils/rethink-tables";
+import { redisReplica } from "../database/redis";
 import rethink from "../database/rethinkdb";
-import redis, { redisReplica } from "../database/redis";
-const checkOddsLength = 3;
+import { tables } from "../utils/rethink-tables";
 
 export default class OddsController {
   constructor() {

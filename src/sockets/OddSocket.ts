@@ -3,6 +3,8 @@ import r from "rethinkdb";
 import { tables } from "../utils/rethink-tables";
 import rethink from "../database/rethinkdb";
 import Websocket from "./Socket";
+import { IMarketType } from "../models/MarketModel";
+import { IFancy } from "../models/FancyModel";
 
 class OddSocket {
   io: any;
@@ -65,15 +67,50 @@ class OddSocket {
         cursor.each((err, market) => {
           if (err) console.log(err);
           if (market && market.new_val) {
-            this.io
-              .to(market.new_val.matchId)
-              .emit("getFancyData", market.new_val);
-            this.io
-              .to(+market.new_val.matchId)
-              .emit("getFancyData", market.new_val);
+            const fancyData = this.createFancyDataAsMarket(market.new_val);
+            this.io.to(market.new_val.matchId).emit("getFancyData", fancyData);
+            this.io.to(+market.new_val.matchId).emit("getFancyData", fancyData);
           }
         });
       });
+  }
+
+  createFancyDataAsMarket(data: IFancy) {
+    const layPriceKeys = Object.keys(data).filter((key) =>
+      key.startsWith("BackPrice")
+    );
+    const runners = [];
+    for (let i = 1; i <= layPriceKeys.length; i++) {
+      let back = {};
+      let lay = {};
+      if (data[`LayPrice${i}`] != undefined) {
+        lay = { price: data[`LayPrice${i}`], size: data[`LaySize${i}`] };
+      }
+      if (data[`BackPrice${i}`] != undefined) {
+        back = { price: data[`BackPrice${i}`], size: data[`BackSize${i}`] };
+      }
+      //Todo: I added only one runner if need 3 then will it to 3 with condition
+      if (i == 1)
+        runners.push({
+          lay,
+          back,
+          selectionId: data.SelectionId,
+          runnerName: "",
+          status: data.GameStatus,
+          sortPriority: i,
+        });
+    }
+
+    return {
+      marketName: data.RunnerName,
+      runners,
+      oddsType: IMarketType.F,
+      min: data.min,
+      max: data.max,
+      rem: data.rem,
+      sortPriority: data.sr_no,
+      fancyType: data.gtype,
+    };
   }
 }
 export default OddSocket;
