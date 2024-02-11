@@ -28,7 +28,10 @@ class OddSocket {
         markets.map((market: IMarket) => {
           const marketData = this.convertDataToMarket(market);
           this.socket.join(market.marketId);
-          this.io.to(market.marketId).emit("getMarketData", marketData);
+          this.io.to(market.marketId).emit("getMarketData", {
+            ...market,
+            runners: marketData,
+          });
         });
       }
 
@@ -56,9 +59,10 @@ class OddSocket {
           if (err) console.log(err);
           const marketData = this.convertDataToMarket(market.new_val);
           if (market && market.new_val) {
-            this.io
-              .to(market.new_val.marketId)
-              .emit("getMarketData", marketData);
+            this.io.to(market.new_val.marketId).emit("getMarketData", {
+              ...market.new_val,
+              runners: marketData,
+            });
           }
         });
       });
