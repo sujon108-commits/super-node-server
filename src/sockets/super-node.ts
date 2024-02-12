@@ -3,6 +3,8 @@ import { io } from "socket.io-client";
 import rethink from "../database/rethinkdb";
 import { tables } from "../utils/rethink-tables";
 import axios from "axios";
+import Websocket from "./Socket";
+let clientIo = Websocket.getInstance();
 
 const socket = io(process.env.SUPER_NODE_URL!, {
   transports: ["websocket"],
@@ -20,6 +22,12 @@ socket.on("newFancyAdded", (fancy) => {
       ...fancy.fancy,
       matchId: fancy.matchId,
     })
+    .then((res) => {
+      if (res.data.data)
+        clientIo
+          .to(fancy.matchId)
+          .emit("addNewFancy", { ...res.data.data, ...fancy });
+    })
     .catch((e) => console.log("new", e.stack, e.response));
 });
 
@@ -27,7 +35,10 @@ socket.on("deactivateFancy-Super", (fancy) => {
   if (Object.keys(fancy).length > 0) {
     Object.keys(fancy).map((matchId) => {
       fancy[matchId].map(async (marketId: any) => {
-        console.log(fancy[matchId]);
+        clientIo
+          .to(fancy.matchId)
+          .emit("removeFancy", { matchId, marketId: `${matchId}-${marketId}` });
+
         await r
           .table(tables.fancies)
           .get(`${matchId}-${marketId}`)

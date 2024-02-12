@@ -53,6 +53,10 @@ class OddSocket {
         });
       }
     });
+
+    this.socket.on("leaveRoom", async (matchId: string) => {
+      this.socket.leave(matchId);
+    });
   }
 
   async changesListener() {
