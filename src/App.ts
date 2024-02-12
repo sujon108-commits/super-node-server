@@ -10,6 +10,7 @@ import "./sockets/super-node";
 import Websocket from "./sockets/Socket";
 import { Socket } from "socket.io";
 import OddSocket from "./sockets/OddSocket";
+import { SuperNodeSocket } from "./sockets/super-node";
 
 class App {
   app: Express;
@@ -41,6 +42,7 @@ class App {
       new OddSocket(socket);
     });
 
+    SuperNodeSocket();
     new RethinkController();
     new OddsController();
 
