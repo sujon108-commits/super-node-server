@@ -44,12 +44,16 @@ class OddSocket {
       if (fancies.length > 0) {
         fancies.map((fancy: any) => {
           const fancyData = MatchController.createFancyDataAsMarket(fancy);
-          this.io
-            .to(fancy.matchId)
-            .emit("getFancyData", { ...fancy, ...fancyData });
-          this.io
-            .to(+fancy.matchId)
-            .emit("getFancyData", { ...fancy, ...fancyData });
+          this.io.to(fancy.matchId).emit("getFancyData", {
+            ...fancy,
+            ...fancyData,
+            marketId: fancy.id,
+          });
+          this.io.to(+fancy.matchId).emit("getFancyData", {
+            ...fancy,
+            ...fancyData,
+            marketId: fancy.id,
+          });
         });
       }
     });
@@ -84,12 +88,16 @@ class OddSocket {
             const fancyData = MatchController.createFancyDataAsMarket(
               market.new_val
             );
-            this.io
-              .to(market.new_val.matchId)
-              .emit("getFancyData", { ...market.new_val, ...fancyData });
-            this.io
-              .to(+market.new_val.matchId)
-              .emit("getFancyData", { ...market.new_val, ...fancyData });
+            this.io.to(market.new_val.matchId).emit("getFancyData", {
+              ...market.new_val,
+              ...fancyData,
+              marketId: market.new_val.id,
+            });
+            this.io.to(+market.new_val.matchId).emit("getFancyData", {
+              ...market.new_val,
+              ...fancyData,
+              marketId: market.new_val.id,
+            });
           }
         });
       });
