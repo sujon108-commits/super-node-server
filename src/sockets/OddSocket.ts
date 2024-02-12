@@ -25,11 +25,9 @@ class OddSocket {
         .run(await rethink);
       const markets = await marketsPromise.toArray();
       if (markets.length > 0) {
-        console.log("join room", markets);
         markets.map((market: IMarket) => {
           const marketData = this.convertDataToMarket(market);
-          this.socket.join(market.marketId);
-          this.io.to(market.marketId).emit("getMarketData", {
+          this.io.to(matchId).emit("getMarketData", {
             ...market,
             runners: marketData,
           });
@@ -72,7 +70,7 @@ class OddSocket {
           if (err) console.log(err);
           const marketData = this.convertDataToMarket(market.new_val);
           if (market && market.new_val) {
-            this.io.to(market.new_val.marketId).emit("getMarketData", {
+            this.io.to(market.new_val.matchId).emit("getMarketData", {
               ...market.new_val,
               runners: marketData,
             });
