@@ -16,11 +16,12 @@ class OddSocket {
 
   onMessage() {
     this.socket.on("joinRoom", async (matchId: string) => {
+      matchId = matchId.toString();
       this.socket.join(matchId);
       // Send markets data immediately join user
       const marketsPromise = await r
         .table(tables.markets)
-        .filter({ matchId: matchId.toString() })
+        .filter({ matchId: matchId })
         .run(await rethink);
       const markets = await marketsPromise.toArray();
       if (markets.length > 0) {
@@ -38,7 +39,7 @@ class OddSocket {
       // Send Fancy data
       const fanciesPromise = await r
         .table(tables.fancies)
-        .filter({ matchId: matchId.toString() })
+        .filter({ matchId: matchId })
         .run(await rethink);
       const fancies = await fanciesPromise.toArray();
       if (fancies.length > 0) {
@@ -49,17 +50,17 @@ class OddSocket {
             ...fancyData,
             marketId: fancy.id,
           });
-          this.io.to(+fancy.matchId).emit("getFancyData", {
-            ...fancy,
-            ...fancyData,
-            marketId: fancy.id,
-          });
+          // this.io.to(+fancy.matchId).emit("getFancyData", {
+          //   ...fancy,
+          //   ...fancyData,
+          //   marketId: fancy.id,
+          // });
         });
       }
     });
 
     this.socket.on("leaveRoom", async (matchId: string) => {
-      this.socket.leave(matchId);
+      this.socket.leave(matchId.toString());
     });
   }
 
@@ -88,16 +89,16 @@ class OddSocket {
             const fancyData = MatchController.createFancyDataAsMarket(
               market.new_val
             );
-            this.io.to(market.new_val.matchId).emit("getFancyData", {
+            this.io.to(market.new_val.matchId.toString()).emit("getFancyData", {
               ...market.new_val,
               ...fancyData,
               marketId: market.new_val.id,
             });
-            this.io.to(+market.new_val.matchId).emit("getFancyData", {
-              ...market.new_val,
-              ...fancyData,
-              marketId: market.new_val.id,
-            });
+            // this.io.to(+market.new_val.matchId).emit("getFancyData", {
+            //   ...market.new_val,
+            //   ...fancyData,
+            //   marketId: market.new_val.id,
+            // });
           }
         });
       });
