@@ -36,7 +36,7 @@ export function SuperNodeSocket() {
     if (Object.keys(fancy).length > 0) {
       Object.keys(fancy).map((matchId) => {
         fancy[matchId].map(async (marketId: any) => {
-          clientIo.to(fancy.matchId).emit("removeFancy", {
+          clientIo.to(matchId).emit("removeFancy", {
             matchId,
             marketId: `${matchId}-${marketId}`,
           });
