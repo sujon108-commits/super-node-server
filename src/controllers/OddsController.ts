@@ -22,10 +22,7 @@ export default class OddsController {
 
   async saveMarkets() {
     setInterval(async () => {
-      const marketsPromise = await r
-        .table(tables.markets)
-        .pluck("marketId")
-        .run(await rethink);
+      const marketsPromise = await r.table(tables.markets).run(await rethink);
       const markets = await marketsPromise.toArray();
       if (markets.length > 0) {
         markets.map((market: any) => {
@@ -37,7 +34,7 @@ export default class OddsController {
                 await r
                   .table(tables.markets)
                   .insert(
-                    { ...marketData, id: marketData.marketId },
+                    { ...market, ...marketData, id: marketData.marketId },
                     { conflict: "update" }
                   )
                   .run(await rethink);

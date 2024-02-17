@@ -4,7 +4,7 @@ import MatchController from "../controllers/api/MatchController";
 import rethink from "../database/rethinkdb";
 import { tables } from "../utils/rethink-tables";
 import Websocket from "./Socket";
-import { IMarket, IRunnerType } from "../models/MarketModel";
+import { IMarket, IRunnerType } from "../interfaces/MarketModel";
 const checkOddsLength = 3;
 class OddSocket {
   io: any;
@@ -68,6 +68,7 @@ class OddSocket {
       .run(await rethink, (err, cursor) => {
         cursor.each((err, market) => {
           if (err) console.log(err);
+
           const marketData = this.convertDataToMarket(market.new_val);
           if (market && market.new_val) {
             this.io.to(market.new_val.matchId).emit("getMarketData", {
@@ -103,7 +104,9 @@ class OddSocket {
   }
 
   convertDataToMarket(marketData: IMarket) {
-    return marketData.runners.map(
+    if (!marketData || !marketData.runners) return [];
+
+    return marketData?.runners?.map(
       ({ selectionId, ex, status, ...restRunner }: IRunnerType) => {
         const backLength = checkOddsLength - ex?.availableToBack?.length! ?? 0;
         if (backLength) {
@@ -118,9 +121,10 @@ class OddSocket {
             ex?.availableToLay.push({ price: "-", size: "-" });
           }
         }
-
         return {
           ...restRunner,
+          selectionId,
+          runnerName: restRunner.runner || restRunner.runnerName,
           status,
           back: ex?.availableToBack.reverse(),
           lay: ex?.availableToLay,

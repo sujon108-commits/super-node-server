@@ -11,6 +11,7 @@ import Websocket from "./sockets/Socket";
 import { Socket } from "socket.io";
 import OddSocket from "./sockets/OddSocket";
 import { SuperNodeSocket } from "./sockets/super-node";
+import { initCasinoSocket } from "./sockets/casino-node";
 
 class App {
   app: Express;
@@ -43,6 +44,7 @@ class App {
     });
 
     SuperNodeSocket();
+    initCasinoSocket();
     new RethinkController();
     new OddsController();
 

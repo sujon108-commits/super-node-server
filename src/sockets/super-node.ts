@@ -60,35 +60,21 @@ export function SuperNodeSocket() {
     try {
       console.log(marketData);
 
-      const getMatchId = await r
-        .table(tables.markets)
-        .filter({ id: marketData.marketId, marketName: "Match Odds" })
-        //@ts-expect-error
-        .pluck(["matchId", "marketName", "marketId"])
-        .run(await rethink);
-      const markets = await getMatchId.toArray();
-      if (markets.length > 0) {
-        markets.map(async (market) => {
-          await r
-            .table(tables.markets)
-            .get(market.marketId)
-            .delete()
-            .run(await rethink);
+      axios
+        .post(`${process.env.SITE_URL}/api/delete-market`, {
+          ...marketData,
+        })
+        .catch((e) => {
+          console.log(e);
         });
-      } else {
-        await r
-          .table(tables.markets)
-          .get(marketData.marketId)
-          .delete()
-          .run(await rethink);
-      }
-      // axios
-      //   .post(`${process.env.NEST_SERVER_URL}/sport/deactivate-market`, {
-      //     market: marketData,
-      //   })
-      //   .catch((e) => {
-      //     console.log(e);
-      //   });
+
+      axios
+        .post(`${process.env.NEST_SERVER_URL}/sport/deactivate-market`, {
+          market: marketData,
+        })
+        .catch((e) => {
+          console.log(e);
+        });
     } catch (e: Error | any) {
       console.log("deactivateMarket-super", e.message);
     }

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import socket from "../sockets/super-node";
 import { marketRepository } from "../schema/Market";
-import { IMarket, IMarketType, IRunnerType } from "../models/MarketModel";
+import { IMarket, IMarketType, IRunnerType } from "../interfaces/MarketModel";
 import axios from "axios";
 
 class SportController {

@@ -4,8 +4,8 @@ import r from "rethinkdb";
 import rethink from "../../database/rethinkdb";
 import { tables } from "../../utils/rethink-tables";
 import OddSocket from "../../sockets/OddSocket";
-import { IMarketType } from "../../models/MarketModel";
-import { IFancy } from "../../models/FancyModel";
+import { IMarketType } from "../../interfaces/MarketModel";
+import { IFancy } from "../../interfaces/FancyModel";
 
 class MatchController {
   public static async addMatchAndMarket(
@@ -139,7 +139,38 @@ class MatchController {
     res: Response
   ): Promise<Response> {
     try {
-      return res.json();
+      const marketData = req.body;
+
+      const getMatchId = await r
+        .table(tables.markets)
+        .filter({ id: marketData.marketId, marketName: "Match Odds" })
+        //@ts-expect-error
+        .pluck(["matchId", "marketName", "marketId"])
+        .run(await rethink);
+      const markets = await getMatchId.toArray();
+      console.log(markets);
+      if (markets.length > 0) {
+        markets.map(async (market) => {
+          await r
+            .table(tables.markets)
+            .get(market.marketId)
+            .delete()
+            .run(await rethink);
+        });
+
+        await r
+          .table(tables.matches)
+          .get(markets[0].matchId)
+          .delete()
+          .run(await rethink);
+      } else {
+        await r
+          .table(tables.markets)
+          .get(marketData.marketId)
+          .delete()
+          .run(await rethink);
+      }
+      return res.json(req.body);
     } catch (e: Error | any) {
       return res.json(e.stack);
     }
