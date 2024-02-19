@@ -3,6 +3,31 @@ import { redisReplica } from "../../database/redis";
 import api from "../../utils/api";
 
 class OddsController {
+  public static async getSports(
+    req: Request,
+    res: Response
+  ): Promise<Response> {
+    try {
+      let competitionsData = [];
+      const data = await redisReplica.get(`getSportList`);
+      if (data) competitionsData = JSON.parse(data);
+
+      // From api
+      if (!data) {
+        const res = await api.get(`/get-sports`);
+        competitionsData = res.data.sports;
+      }
+
+      return res.json({
+        sports: competitionsData,
+      });
+    } catch (e: any) {
+      return res.json({
+        sports: [],
+        error: e.message,
+      });
+    }
+  }
   public static getOdds = async (req: Request, res: Response): Promise<any> => {
     try {
       let { MarketID, marketId } = req.query;
@@ -101,6 +126,7 @@ class OddsController {
       const data = await redisReplica.get(`getCompetitions-${EventTypeID}`);
       if (data) competitionsData = JSON.parse(data);
 
+      // From api
       if (!data) {
         const res = await api.get(`/get-series?EventTypeID=${EventTypeID}`);
         competitionsData = res.data.sports;
@@ -159,7 +185,14 @@ class OddsController {
       if (!EventID) throw Error("EventID is required field");
 
       let matchList = [];
-      if (req.originalUrl.includes("get-marketes")) {
+      if (req.originalUrl.includes("get-marketes-t10")) {
+        const data = await redisReplica.get(`getMarketList-bm-${EventID}`);
+        if (data) matchList = JSON.parse(data);
+        if (!data) {
+          const res = await api.get(`/get-marketes-t10?EventID=${EventID}`);
+          matchList = res.data.sports;
+        }
+      } else if (req.originalUrl.includes("get-marketes")) {
         const data = await redisReplica.get(`getMarketList-${EventID}`);
         if (data) matchList = JSON.parse(data);
         if (!data) {
@@ -199,8 +232,10 @@ class OddsController {
       let matchList = [];
       const data = await redisReplica.get(`fancy-${MatchID}`);
       if (data) matchList = JSON.parse(data);
-
-      if (!data) {
+      if (req.originalUrl.includes("get-sessions-t10") && !data) {
+        const res = await api.get(`/get-sessions-t10?MatchID=${MatchID}`);
+        matchList = res.data.sports;
+      } else if (req.originalUrl.includes("get-sessions") && !data) {
         const res = await api.get(`/get-sessions?MatchID=${MatchID}`);
         matchList = res.data.sports;
       }
@@ -211,6 +246,28 @@ class OddsController {
     } catch (e: any) {
       return res.json({
         sports: [],
+        error: e.message,
+      });
+    }
+  }
+
+  public static async fancyData(
+    req: Request,
+    res: Response
+  ): Promise<Response> {
+    try {
+      const { MatchID }: any = req.query;
+      if (!MatchID) throw Error("MatchID is required field");
+
+      let response: any = await redisReplica.get(`fancy-${MatchID}`);
+      response = response ? { data: JSON.parse(response) } : { data: [] };
+
+      return res.json({
+        ...response,
+        error: "",
+      });
+    } catch (e: any) {
+      return res.json({
         error: e.message,
       });
     }
