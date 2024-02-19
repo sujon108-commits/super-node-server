@@ -6,6 +6,7 @@ import { tables } from "../../utils/rethink-tables";
 import OddSocket from "../../sockets/OddSocket";
 import { IMarketType } from "../../interfaces/MarketModel";
 import { IFancy } from "../../interfaces/FancyModel";
+import api from "../../utils/api";
 
 class MatchController {
   public static async addMatchAndMarket(
@@ -22,26 +23,26 @@ class MatchController {
       }
       const matchIds = matches.map(({ matchId }: any) => matchId.toString());
 
-      axios
-        .post(`${process.env.SUPER_NODE_URL}/save-match`, {
+      api
+        .post(`save-match`, {
           matches: matches.map((match: any) => ({
             ...match,
             matchId: match.matchId.toString(),
           })),
         })
-        .then((res) => console.log(res.data))
+        .then((res) => console.log("res"))
         .catch((e: any) => {
-          console.log(e.response);
+          console.log("err", e.response, e.config);
         });
 
       const marketsData = MatchController.marketsData(
         matchIds,
-        `${process.env.SUPER_NODE_URL}/api/get-marketes?EventID=`
+        `get-marketes?EventID=`
       );
 
       const bookMarketsData = MatchController.marketsData(
         matchIds,
-        `${process.env.SUPER_NODE_URL}/api/get-bookmaker-marketes?EventID=`
+        `get-bookmaker-marketes?EventID=`
       );
 
       Promise.allSettled([marketsData, bookMarketsData]).then(
@@ -84,12 +85,9 @@ class MatchController {
       );
 
       matchIds.map((matchId: string) => {
-        axios
-          .get(
-            `${process.env.SUPER_NODE_URL}/api/get-sessions?MatchID=${matchId}`
-          )
+        api
+          .get(`get-sessions?MatchID=${matchId}`)
           .then(async (res: any) => {
-            console.log(res.data.sports);
             res.data.sports.map(async (fancy: any) => {
               await r
                 .table(tables.fancies)
@@ -112,7 +110,9 @@ class MatchController {
   static marketsData = (matchIds: [], url: string) => {
     return new Promise((resolve, reject) => {
       const requests = matchIds.map((matchId: string) =>
-        axios.get(`${url}${matchId}`)
+        api.get(`${url}${matchId}`, {
+          params: { retry: 3 },
+        })
       );
 
       axios
