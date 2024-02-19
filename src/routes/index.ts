@@ -9,6 +9,7 @@ router.post("/delete-market", MatchController.deleteMarket);
 router.get("/get-sports", OddsController.getSports);
 router.get("/get-odds", OddsController.getOdds);
 router.get("/get-series", OddsController.getSeries);
+router.get("/get-matches", OddsController.getMatchList);
 router.get("/get-bookmaker-odds", OddsController.getOdds);
 router.get("/get-single-session", OddsController.getSingleSessionMarket);
 router.get("/get-marketes", OddsController.getMarketList);
