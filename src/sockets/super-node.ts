@@ -59,22 +59,25 @@ export function SuperNodeSocket() {
   socket.on("deactivateMarket-Super", async (marketData) => {
     try {
       console.log(marketData);
+      if (marketData.type == "t10") {
+        console.log("t10 matches", marketData);
+      } else {
+        axios
+          .post(`${process.env.SITE_URL}/api/delete-market`, {
+            ...marketData,
+          })
+          .catch((e) => {
+            console.log(e);
+          });
 
-      axios
-        .post(`${process.env.SITE_URL}/api/delete-market`, {
-          ...marketData,
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-
-      axios
-        .post(`${process.env.NEST_SERVER_URL}/sport/deactivate-market`, {
-          market: marketData,
-        })
-        .catch((e) => {
-          console.log(e);
-        });
+        axios
+          .post(`${process.env.NEST_SERVER_URL}/sport/deactivate-market`, {
+            market: marketData,
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
     } catch (e: Error | any) {
       console.log("deactivateMarket-super", e.message);
     }

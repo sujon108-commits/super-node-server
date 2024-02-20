@@ -128,6 +128,7 @@ class OddSocket {
           status,
           back: ex?.availableToBack.reverse(),
           lay: ex?.availableToLay,
+          ex,
         };
       }
     );

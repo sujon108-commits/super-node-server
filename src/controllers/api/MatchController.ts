@@ -35,71 +35,116 @@ class MatchController {
           console.log("err", e.response, e.config);
         });
 
-      const marketsData = MatchController.marketsData(
-        matchIds,
-        `get-marketes?EventID=`
+      const T10MatchIds = matchIds.filter(
+        (match: string) => match.includes("111") || match.includes("120")
       );
 
-      const bookMarketsData = MatchController.marketsData(
-        matchIds,
-        `get-bookmaker-marketes?EventID=`
+      const otherMatchIds = matchIds.filter(
+        (match: string) => !match.includes("111") || !match.includes("120")
       );
 
-      Promise.allSettled([marketsData, bookMarketsData]).then(
-        async (markets: any) => {
-          const matchesData: any = {};
-          const marketsData: any = {};
-          markets.map((market: { status: string; value: any }) => {
-            if (market.status === "fulfilled") {
-              const keys = Object.keys(market.value);
-              if (keys.length > 0) {
-                keys.map((key) => {
-                  market.value[key].map(
-                    (m: {
-                      marketId: string;
-                      marketName: string;
-                      matchId: number | string;
-                    }) => {
-                      matchesData[m.matchId] = {
-                        id: m.matchId,
-                        matchId: m.matchId,
-                      };
-                      marketsData[m.marketId] = { ...m, id: m.marketId };
-                    }
-                  );
-                });
+      if (otherMatchIds.length > 0) {
+        const marketsData = MatchController.marketsData(
+          otherMatchIds,
+          `get-marketes?EventID=`
+        );
+
+        const bookMarketsData = MatchController.marketsData(
+          otherMatchIds,
+          `get-bookmaker-marketes?EventID=`
+        );
+
+        Promise.allSettled([marketsData, bookMarketsData]).then(
+          async (markets: any) => {
+            const matchesData: any = {};
+            const marketsData: any = {};
+            markets.map((market: { status: string; value: any }) => {
+              if (market.status === "fulfilled") {
+                const keys = Object.keys(market.value);
+                if (keys.length > 0) {
+                  keys.map((key) => {
+                    market.value[key].map(
+                      (m: {
+                        marketId: string;
+                        marketName: string;
+                        matchId: number | string;
+                      }) => {
+                        matchesData[m.matchId] = {
+                          id: m.matchId,
+                          matchId: m.matchId,
+                        };
+                        marketsData[m.marketId] = { ...m, id: m.marketId };
+                      }
+                    );
+                  });
+                }
               }
-            }
-          });
-
-          await r
-            .table(tables.matches)
-            .insert(Object.values(matchesData), { conflict: "update" })
-            .run(await rethink);
-
-          await r
-            .table(tables.markets)
-            .insert(Object.values(marketsData), { conflict: "update" })
-            .run(await rethink);
-        }
-      );
-
-      matchIds.map((matchId: string) => {
-        api
-          .get(`get-sessions?MatchID=${matchId}`)
-          .then(async (res: any) => {
-            res.data.sports.map(async (fancy: any) => {
-              await r
-                .table(tables.fancies)
-                .insert(
-                  { ...fancy, id: `${matchId}-${fancy.SelectionId}` },
-                  { conflict: "update" }
-                )
-                .run(await rethink);
             });
-          })
-          .catch(() => {});
-      });
+
+            await r
+              .table(tables.matches)
+              .insert(Object.values(matchesData), { conflict: "update" })
+              .run(await rethink);
+
+            await r
+              .table(tables.markets)
+              .insert(Object.values(marketsData), { conflict: "update" })
+              .run(await rethink);
+          }
+        );
+
+        otherMatchIds.map((matchId: string) => {
+          api
+            .get(`get-sessions?MatchID=${matchId}`)
+            .then(async (res: any) => {
+              res.data.sports.map(async (fancy: any) => {
+                await r
+                  .table(tables.fancies)
+                  .insert(
+                    { ...fancy, id: `${matchId}-${fancy.SelectionId}` },
+                    { conflict: "update" }
+                  )
+                  .run(await rethink);
+              });
+            })
+            .catch(() => {});
+        });
+      }
+
+      if (T10MatchIds.length > 0) {
+        console.log("here====");
+        const matchesData: any = {};
+        T10MatchIds.forEach(
+          (matchId: string) =>
+            (matchesData[matchId] = {
+              id: matchId,
+              matchId,
+              type: "t10",
+            })
+        );
+
+        await r
+          .table(tables.matches)
+          .insert(Object.values(matchesData), { conflict: "update" })
+          .run(await rethink);
+
+        T10MatchIds.map((matchId: string) => {
+          api
+            .get(`get-sessions-t10?MatchID=${matchId}`)
+            .then(async (res: any) => {
+              res.data.sports.map(async (fancy: any) => {
+                await r
+                  .table(tables.fancies)
+                  .insert(
+                    { ...fancy, id: `${matchId}-${fancy.SelectionId}` },
+                    { conflict: "update" }
+                  )
+                  .run(await rethink);
+              });
+            })
+            .catch(() => {});
+        });
+      }
 
       return res.json({ success: true, message: "matches added" });
     } catch (e: Error | any) {
