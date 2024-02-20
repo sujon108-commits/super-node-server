@@ -57,6 +57,10 @@ class OddSocket {
       }
     });
 
+    this.socket.on("joinMarketRoom", (room) => {
+      this.socket.join(room);
+    });
+
     this.socket.on("leaveRoom", async (matchId: string) => {
       this.socket.leave(matchId.toString());
     });
@@ -75,6 +79,10 @@ class OddSocket {
               ...market.new_val,
               runners: marketData,
             });
+            this.io.to(market.new_val.marketId).emit("getMarketData", {
+              ...market.new_val,
+              runners: marketData,
+            });
           }
         });
       });
@@ -88,7 +96,7 @@ class OddSocket {
             const fancyData = MatchController.createFancyDataAsMarket(
               market.new_val
             );
-            this.io.to(market.new_val.matchId.toString()).emit("getFancyData", {
+            this.io.to(market.new_val.matchId).emit("getFancyData", {
               ...market.new_val,
               ...fancyData,
               marketId: market.new_val.id,
