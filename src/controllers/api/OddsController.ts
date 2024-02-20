@@ -153,6 +153,7 @@ class OddsController {
       if (!CompetitionID) throw Error("CompetitionID is required field");
 
       let matchList = [];
+
       const data = await redisReplica.get(
         `getMatchList-${EventTypeID}-${CompetitionID}`
       );
@@ -162,6 +163,32 @@ class OddsController {
         const res = await api.get(
           `/get-matches?EventTypeID=${EventTypeID}&CompetitionID=${CompetitionID}`
         );
+        matchList = res.data.sports;
+      }
+
+      return res.json({
+        sports: matchList,
+      });
+    } catch (e: any) {
+      return res.json({
+        sports: [],
+        error: e.message,
+      });
+    }
+  }
+
+  public static async getMatchListT10(
+    req: Request,
+    res: Response
+  ): Promise<Response> {
+    try {
+      let matchList = [];
+
+      const data = await redisReplica.get(`getMatchList-T10`);
+      if (data) matchList = JSON.parse(data);
+
+      if (!data) {
+        const res = await api.get(`/get-matches-t10`);
         matchList = res.data.sports;
       }
 
