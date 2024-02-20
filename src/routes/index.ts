@@ -1,6 +1,7 @@
 import { Router } from "express";
 import MatchController from "../controllers/api/MatchController";
 import OddsController from "../controllers/api/OddsController";
+import CasinoController from "../controllers/api/CasinoController";
 
 const router = Router();
 router.post("/save-match", MatchController.addMatchAndMarket);
@@ -19,5 +20,7 @@ router.get("/get-bookmaker-marketes", OddsController.getMarketList);
 router.get("/get-sessions", OddsController.getSessions);
 router.get("/get-sessions-t10", OddsController.getSessions);
 router.get("/fancy-data", OddsController.fancyData);
+
+router.get("/get-casino-market/:type", new CasinoController().getCasinoMarket);
 
 export default router;
