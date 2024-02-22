@@ -30,6 +30,7 @@ export function SuperNodeSocket() {
             .emit("addNewFancy", { ...res.data.data, ...fancy });
       })
       .catch((e) => console.log("new", e.stack, e.response));
+    clientIo.emit("newFancyAdded", fancy);
   });
 
   socket.on("deactivateFancy-Super", (fancy) => {
@@ -53,6 +54,8 @@ export function SuperNodeSocket() {
             .catch((e) => console.log("deac", e.stack));
         });
       });
+
+      clientIo.emit("deactivateMarket", fancy);
     }
   });
 
@@ -78,6 +81,7 @@ export function SuperNodeSocket() {
             console.log(e);
           });
       }
+      clientIo.emit("deactivateMarket", marketData);
     } catch (e: Error | any) {
       console.log("deactivateMarket-super", e.message);
     }
