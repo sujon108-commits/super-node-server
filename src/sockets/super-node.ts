@@ -55,7 +55,7 @@ export function SuperNodeSocket() {
         });
       });
 
-      clientIo.emit("deactivateMarket", fancy);
+      clientIo.emit("deactivateFancy", fancy);
     }
   });
 
