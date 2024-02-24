@@ -13,7 +13,6 @@ export function SuperNodeSocket() {
 
   socket.on("connect", () => {
     console.log("connected super-node");
-    //new SocketController();
     socket.emit("joinMarketRoom-Super", "fancyEvents");
   });
 
