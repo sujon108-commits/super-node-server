@@ -1,12 +1,13 @@
 import axios from "axios";
 import { Request, Response } from "express";
-import r from "rethinkdb";
-import rethink from "../../database/rethinkdb";
-import { tables } from "../../utils/rethink-tables";
-import OddSocket from "../../sockets/OddSocket";
-import { IMarketType } from "../../interfaces/MarketModel";
 import { IFancy } from "../../interfaces/FancyModel";
+import { IMarketType } from "../../interfaces/MarketModel";
+import { fancyRepository } from "../../schema/Fancy";
+import { marketRepository } from "../../schema/Market";
+import { matchRepository } from "../../schema/Match";
 import api from "../../utils/api";
+import Websocket from "../../sockets/Socket";
+import { eventJson } from "../../utils/casino-types";
 
 class MatchController {
   public static async addMatchAndMarket(
@@ -54,42 +55,34 @@ class MatchController {
           `get-bookmaker-marketes?EventID=`
         );
 
+        if (matchIds.length > 0) {
+          matchIds.map(async (matchId: any) => {
+            await matchRepository.save(matchId, {
+              matchId: +matchId,
+            });
+          });
+        }
+
         Promise.allSettled([marketsData, bookMarketsData]).then(
           async (markets: any) => {
-            const matchesData: any = {};
-            const marketsData: any = {};
             markets.map((market: { status: string; value: any }) => {
               if (market.status === "fulfilled") {
                 const keys = Object.keys(market.value);
                 if (keys.length > 0) {
                   keys.map((key) => {
                     market.value[key].map(
-                      (m: {
+                      async (m: {
                         marketId: string;
                         marketName: string;
-                        matchId: number | string;
+                        matchId: string;
                       }) => {
-                        matchesData[m.matchId] = {
-                          id: m.matchId,
-                          matchId: m.matchId,
-                        };
-                        marketsData[m.marketId] = { ...m, id: m.marketId };
+                        await marketRepository.save(m.marketId, m);
                       }
                     );
                   });
                 }
               }
             });
-
-            await r
-              .table(tables.matches)
-              .insert(Object.values(matchesData), { conflict: "update" })
-              .run(await rethink);
-
-            await r
-              .table(tables.markets)
-              .insert(Object.values(marketsData), { conflict: "update" })
-              .run(await rethink);
           }
         );
 
@@ -98,13 +91,19 @@ class MatchController {
             .get(`get-sessions?MatchID=${matchId}`)
             .then(async (res: any) => {
               res.data.sports.map(async (fancy: any) => {
-                await r
-                  .table(tables.fancies)
-                  .insert(
-                    { ...fancy, id: `${matchId}-${fancy.SelectionId}` },
-                    { conflict: "update" }
-                  )
-                  .run(await rethink);
+                fancy = {
+                  ...fancy,
+                  SelectionId: +fancy.SelectionId,
+                  min: +fancy.min,
+                  max: +fancy.max,
+                  sr_no: +fancy.sr_no,
+                  ballsess: +fancy.ballsess,
+                };
+
+                await fancyRepository.save(`${matchId}-${fancy.SelectionId}`, {
+                  ...fancy,
+                  matchId: +matchId,
+                });
               });
             })
             .catch(() => {});
@@ -112,34 +111,48 @@ class MatchController {
       }
 
       if (T10MatchIds.length > 0) {
-        console.log("here====");
-        const matchesData: any = {};
-        T10MatchIds.forEach(
-          (matchId: string) =>
-            (matchesData[matchId] = {
-              id: matchId,
-              matchId,
-              type: "t10",
-            })
-        );
+        T10MatchIds.forEach(async (matchId: string) => {
+          const matchData = await matchRepository
+            .search()
+            .where("matchId")
+            .equals(matchId)
+            .return.first();
 
-        await r
-          .table(tables.matches)
-          .insert(Object.values(matchesData), { conflict: "update" })
-          .run(await rethink);
+          if (matchData) {
+            matchData.matchId = matchId;
+            matchRepository.save(matchData);
+          } else {
+            await matchRepository.save(matchId.toString(), {
+              matchId: matchId,
+              type: "t10",
+            });
+          }
+        });
 
         T10MatchIds.map((matchId: string) => {
           api
             .get(`get-sessions-t10?MatchID=${matchId}`)
             .then(async (res: any) => {
               res.data.sports.map(async (fancy: any) => {
-                await r
-                  .table(tables.fancies)
-                  .insert(
-                    { ...fancy, id: `${matchId}-${fancy.SelectionId}` },
-                    { conflict: "update" }
-                  )
-                  .run(await rethink);
+                const fancyData = await fancyRepository
+                  .search()
+                  .where("matchId")
+                  .equals(matchId)
+                  .where("SelectionId")
+                  .equals(fancy.SelectionId)
+                  .return.first();
+
+                if (fancyData) {
+                  fancyRepository.save({
+                    ...fancy,
+                    ...fancyData,
+                  });
+                } else {
+                  await fancyRepository.save(
+                    `${matchId}-${fancy.SelectionId}`,
+                    fancy
+                  );
+                }
               });
             })
             .catch(() => {});
@@ -168,7 +181,8 @@ class MatchController {
               ({ marketId, marketName, event }: any) => ({
                 marketId,
                 marketName,
-                matchId: event?.id || res.config.url?.split("=")[1],
+                matchId: +event?.id || +res.config.url?.split("=")[1],
+                oddsType: url.includes("bookmaker") ? "BM" : "M",
               })
             );
             return acc;
@@ -185,35 +199,30 @@ class MatchController {
   ): Promise<Response> {
     try {
       const marketData = req.body;
+      if (!marketData.marketId) return res.json({ success: false });
 
-      const getMatchId = await r
-        .table(tables.markets)
-        .filter({ id: marketData.marketId, marketName: "Match Odds" })
-        //@ts-expect-error
-        .pluck(["matchId", "marketName", "marketId"])
-        .run(await rethink);
-      const markets = await getMatchId.toArray();
-      console.log(markets);
-      if (markets.length > 0) {
-        markets.map(async (market) => {
-          await r
-            .table(tables.markets)
-            .get(market.marketId)
-            .delete()
-            .run(await rethink);
+      const markets: any = await marketRepository
+        .search()
+        .where("marketId")
+        .equals(marketData.marketId)
+        .where("marketName")
+        .equals("Match Odds")
+        .return.all();
+
+      if (markets && markets?.length > 0) {
+        markets.map(async (market: any) => {
+          await marketRepository.remove(market.marketId);
         });
 
-        await r
-          .table(tables.matches)
-          .get(markets[0].matchId)
-          .delete()
-          .run(await rethink);
+        await matchRepository.remove(markets[0].matchId);
+        const ids = await fancyRepository
+          .search()
+          .where("matchId")
+          .equals(markets[0].matchId)
+          .return.allIds();
+        await fancyRepository.remove(...ids);
       } else {
-        await r
-          .table(tables.markets)
-          .get(marketData.marketId)
-          .delete()
-          .run(await rethink);
+        await marketRepository.remove(marketData.marketId);
       }
       return res.json(req.body);
     } catch (e: Error | any) {
@@ -257,6 +266,20 @@ class MatchController {
       sortPriority: data.sr_no,
       fancyType: data.gtype,
     };
+  }
+
+  public static testingSocketEvents(
+    req: Request,
+    res: Response | any
+  ): Promise<Response> {
+    try {
+      const { data } = req.body;
+      const io = Websocket.getInstance();
+      io.emit(data.event, data.data);
+      return res.json({ success: true, message: "matches added" });
+    } catch (e: Error | any) {
+      return res.json(e.stack);
+    }
   }
 }
 

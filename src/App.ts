@@ -2,9 +2,7 @@ import cors from "cors";
 import express, { Express } from "express";
 import { createServer, Server } from "http";
 import OddsController from "./controllers/OddsController";
-import RethinkController from "./controllers/RethinkController";
 import "./database/redis";
-import "./database/rethinkdb";
 import router from "./routes";
 import "./sockets/super-node";
 import Websocket from "./sockets/Socket";
@@ -45,7 +43,6 @@ class App {
 
     SuperNodeSocket();
     initCasinoSocket();
-    new RethinkController();
     new OddsController();
 
     this.server.listen(this.port, () => {

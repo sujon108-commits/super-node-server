@@ -6,6 +6,7 @@ import CasinoController from "../controllers/api/CasinoController";
 const router = Router();
 router.post("/save-match", MatchController.addMatchAndMarket);
 router.post("/delete-market", MatchController.deleteMarket);
+router.post("/test-event", MatchController.testingSocketEvents);
 
 router.get("/get-sports", OddsController.getSports);
 router.get("/get-odds", OddsController.getOdds);

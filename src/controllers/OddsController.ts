@@ -1,11 +1,18 @@
-import r from "rethinkdb";
 import { redisReplica } from "../database/redis";
-import rethink from "../database/rethinkdb";
-import { tables } from "../utils/rethink-tables";
+import { matchRepository } from "../schema/Match";
+import { fancyRepository } from "../schema/Fancy";
+import { marketRepository } from "../schema/Market";
+import _ from "lodash";
+import Websocket from "../sockets/Socket";
+import OddSocket from "../sockets/OddSocket";
+import MatchController from "./api/MatchController";
+import { EntityId, EntityKeyName } from "redis-om";
 
 export default class OddsController {
+  io: any;
   constructor() {
     try {
+      this.io = Websocket.getInstance();
       this.saveMarkets();
       this.saveFancies();
     } catch (e) {
@@ -22,8 +29,8 @@ export default class OddsController {
 
   async saveMarkets() {
     setInterval(async () => {
-      const marketsPromise = await r.table(tables.markets).run(await rethink);
-      const markets = await marketsPromise.toArray();
+      const markets = await marketRepository.search().return.all();
+      console.log(markets.length);
       if (markets.length > 0) {
         markets.map((market: any) => {
           redisReplica
@@ -31,45 +38,82 @@ export default class OddsController {
             .then(async (value) => {
               if (value) {
                 const marketData = JSON.parse(value);
-                await r
-                  .table(tables.markets)
-                  .insert(
-                    { ...market, ...marketData, id: marketData.marketId },
-                    { conflict: "update" }
-                  )
-                  .run(await rethink);
+
+                marketData.runners = marketData.runners.map((runner: any) => ({
+                  ...runner,
+                  runnerName: runner.runner,
+                  selectionId: runner.selectionId.toString(),
+                }));
+                const convertedData = OddSocket.convertDataToMarket({
+                  ...market,
+                  ...marketData,
+                });
+                marketData.runners = convertedData;
+                if (!_.isEqual(market.runners, marketData.runners)) {
+                  console.log("changed");
+                  this.io.to(market.matchId).emit("getMarketData", {
+                    ...market,
+                    ...marketData,
+                  });
+                }
+                console.log("==========");
+
+                await marketRepository.save(market.marketId, {
+                  ...market,
+                  ...marketData,
+                });
               }
             })
             .catch(console.log);
         });
       }
-    }, 250);
+    }, 1000);
   }
 
   async saveFancies() {
     setInterval(async () => {
-      const matchPromise = await r
-        .table(tables.matches)
-        .pluck("matchId")
-        .run(await rethink);
-      const matches = await matchPromise.toArray();
+      const matches = await matchRepository.search().return.all();
+
       if (matches.length > 0) {
         matches.map(({ matchId }: any) => {
           redisReplica.get(`fancy-${matchId}`).then(async (value: any) => {
             if (value) {
               const fancies = JSON.parse(value);
               fancies.map(async (fancy: any) => {
-                await r
-                  .table(tables.fancies)
-                  .insert(
-                    {
-                      ...fancy,
-                      matchId,
-                      id: `${matchId}-${fancy.SelectionId}`,
-                    },
-                    { conflict: "update" }
-                  )
-                  .run(await rethink);
+                fancy = {
+                  ...fancy,
+                  SelectionId: +fancy.SelectionId,
+                  min: +fancy.min,
+                  max: +fancy.max,
+                  sr_no: +fancy.sr_no,
+                  ballsess: +fancy.ballsess,
+                };
+                const fancyRedis = await fancyRepository.fetch(
+                  `${matchId}-${fancy.SelectionId}`
+                );
+
+                delete fancyRedis[EntityId];
+                delete fancyRedis[EntityKeyName];
+
+                if (!_.isEqual(fancyRedis, { ...fancy, matchId })) {
+                  const fancyData = MatchController.createFancyDataAsMarket({
+                    ...fancyRedis,
+                    ...fancy,
+                  });
+                  this.io.to(matchId).emit("getFancyData", {
+                    ...fancyRedis,
+                    ...fancy,
+                  });
+
+                  this.io.emit("getFancyData-new", {
+                    ...fancyData,
+                  });
+                }
+
+                await fancyRepository.save(`${matchId}-${fancy.SelectionId}`, {
+                  ...fancy,
+                  matchId: +matchId,
+                });
               });
             }
           });

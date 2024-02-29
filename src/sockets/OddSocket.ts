@@ -1,32 +1,32 @@
-import r from "rethinkdb";
 import { Socket } from "socket.io";
 import MatchController from "../controllers/api/MatchController";
-import rethink from "../database/rethinkdb";
-import { tables } from "../utils/rethink-tables";
 import Websocket from "./Socket";
 import { IMarket, IRunnerType } from "../interfaces/MarketModel";
+import { marketRepository } from "../schema/Market";
+import { fancyRepository } from "../schema/Fancy";
 const checkOddsLength = 3;
 class OddSocket {
   io: any;
   constructor(private socket: Socket) {
     this.io = Websocket.getInstance();
     this.onMessage();
-    this.changesListener();
   }
 
   onMessage() {
     this.socket.on("joinRoom", async (matchId: string) => {
+      this.socket.join(matchId);
       matchId = matchId.toString();
       this.socket.join(matchId);
-      // Send markets data immediately join user
-      const marketsPromise = await r
-        .table(tables.markets)
-        .filter({ matchId: matchId })
-        .run(await rethink);
-      const markets = await marketsPromise.toArray();
+      const markets = await marketRepository
+        .search()
+        .where("matchId")
+        .eq(matchId)
+        .return.all();
+
       if (markets.length > 0) {
-        markets.map((market: IMarket) => {
-          const marketData = this.convertDataToMarket(market);
+        markets.map((market) => {
+          //@ts-expect-error
+          const marketData = OddSocket.convertDataToMarket(market as IMarket);
           this.io.to(matchId).emit("getMarketData", {
             ...market,
             runners: marketData,
@@ -34,25 +34,23 @@ class OddSocket {
         });
       }
 
-      // Send Fancy data
-      const fanciesPromise = await r
-        .table(tables.fancies)
-        .filter({ matchId: matchId })
-        .run(await rethink);
-      const fancies = await fanciesPromise.toArray();
+      const fancies = await fancyRepository
+        .search()
+        .where("matchId")
+        .eq(matchId)
+        .return.all();
+
       if (fancies.length > 0) {
         fancies.map((fancy: any) => {
           const fancyData = MatchController.createFancyDataAsMarket(fancy);
-          this.io.to(fancy.matchId).emit("getFancyData", {
+
+          this.io.to(matchId).emit("getFancyData", {
             ...fancy,
-            ...fancyData,
-            marketId: fancy.id,
           });
-          // this.io.to(+fancy.matchId).emit("getFancyData", {
-          //   ...fancy,
-          //   ...fancyData,
-          //   marketId: fancy.id,
-          // });
+
+          this.io.emit("getFancyData-new", {
+            ...fancyData,
+          });
         });
       }
     });
@@ -66,52 +64,7 @@ class OddSocket {
     });
   }
 
-  async changesListener() {
-    r.table(tables.markets)
-      .changes()
-      .run(await rethink, (err, cursor) => {
-        cursor.each((err, market) => {
-          if (err) console.log(err);
-
-          const marketData = this.convertDataToMarket(market.new_val);
-          if (market && market.new_val) {
-            this.io.to(market.new_val.matchId).emit("getMarketData", {
-              ...market.new_val,
-              runners: marketData,
-            });
-            this.io.to(market.new_val.marketId).emit("getMarketData", {
-              ...market.new_val,
-              runners: marketData,
-            });
-          }
-        });
-      });
-
-    r.table(tables.fancies)
-      .changes()
-      .run(await rethink, (err, cursor) => {
-        cursor.each((err, market) => {
-          if (err) console.log(err);
-          if (market && market.new_val) {
-            const fancyData = MatchController.createFancyDataAsMarket(
-              market.new_val
-            );
-            this.io.to(market.new_val.matchId).emit("getFancyData", {
-              ...market.new_val,
-              ...fancyData,
-              marketId: market.new_val.id,
-            });
-            // this.io.to(+market.new_val.matchId).emit("getFancyData", {
-            //   ...market.new_val,
-            //   ...fancyData,
-            //   marketId: market.new_val.id,
-            // });
-          }
-        });
-      });
-  }
-
-  convertDataToMarket(marketData: IMarket) {
+  public static convertDataToMarket(marketData: IMarket) {
     if (!marketData || !marketData.runners) return [];
 
     return marketData?.runners?.map(
