@@ -120,4 +120,66 @@ export default class CasinoController extends ApiController {
       return this.fail(res, "");
     }
   };
+
+  getSingleMarket = async (req: Request, res: Response) => {
+    let { type, selectionId } = req.params;
+    try {
+      if (!type) this.fail(res, "type is required field");
+      if (!selectionId) this.fail(res, "selectionId is required field");
+
+      //let casinoType: any = new DynamicClass(type, {});
+
+      if (type === "AAA") type = "aaa";
+
+      let data: any = await redisReplica.get(types[type]);
+      data = data ? { data: JSON.parse(data) } : { data: [] };
+
+      let markets: any = [];
+      let singleMarket = {};
+      if (data?.data?.t2) markets = [...markets, ...data?.data?.t2];
+      if (data?.data?.t3) markets = [...markets, ...data?.data?.t3];
+      if (data?.data?.t4) markets = [...markets, ...data?.data?.t4];
+      if (data?.data?.bf) markets = [...data?.data?.bf];
+
+      if (markets.length > 0 && selectionId) {
+        let sidStr = "sid";
+        switch (type.toLowerCase()) {
+          case "testtp":
+            sidStr = "tsection";
+            break;
+          case "tp1day":
+            sidStr = "sectionId";
+            break;
+        }
+
+        const matchedRecord = markets.filter(
+          (market: any) => market[sidStr] == selectionId
+        );
+
+        if (matchedRecord.length > 0) {
+          singleMarket = matchedRecord[0];
+        }
+      }
+
+      if (
+        data?.data?.t1 &&
+        data?.data?.t1.length > 0 &&
+        data?.data?.t1[0].min
+      ) {
+        const min =
+          data?.data?.t1 && data?.data?.t1.length > 0
+            ? data?.data?.t1[0].min
+            : 0;
+        const max =
+          data?.data?.t1 && data?.data?.t1.length > 0
+            ? data?.data?.t1[0].max
+            : 0;
+        singleMarket = { ...singleMarket, min, max };
+      }
+
+      return this.success(res, { ...singleMarket });
+    } catch (e: any) {
+      return this.fail(res, e.stack);
+    }
+  };
 }

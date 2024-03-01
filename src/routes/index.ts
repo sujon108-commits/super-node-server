@@ -21,7 +21,12 @@ router.get("/get-bookmaker-marketes", OddsController.getMarketList);
 router.get("/get-sessions", OddsController.getSessions);
 router.get("/get-sessions-t10", OddsController.getSessions);
 router.get("/fancy-data", OddsController.fancyData);
+router.get("/get-odds-single", OddsController.getMakerOddsSingle);
 
 router.get("/get-casino-market/:type", new CasinoController().getCasinoMarket);
+router.get(
+  "/get-single-market/:type/:selectionId",
+  new CasinoController().getSingleMarket
+);
 
 export default router;
