@@ -40,7 +40,7 @@ export default class OddsController {
 
                 marketData.runners = marketData.runners.map((runner: any) => ({
                   ...runner,
-                  runnerName: runner.runner,
+                  runnerName: runner.runner || runner.runnerName,
                   selectionId: runner.selectionId.toString(),
                 }));
                 const convertedData = OddSocket.convertDataToMarket({
