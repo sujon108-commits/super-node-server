@@ -49,6 +49,7 @@ class OddSocket {
           });
 
           this.io.emit("getFancyData-new", {
+            ...fancy,
             ...fancyData,
           });
         });

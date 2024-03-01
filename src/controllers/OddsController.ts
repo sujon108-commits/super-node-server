@@ -107,6 +107,7 @@ export default class OddsController {
                   });
 
                   this.io.emit("getFancyData-new", {
+                    ...fancy,
                     ...fancyData,
                   });
                 }
