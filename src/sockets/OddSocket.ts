@@ -31,6 +31,10 @@ class OddSocket {
             ...market,
             runners: marketData,
           });
+          this.io.to(market.marketId).emit("getMarketData", {
+            ...market,
+            runners: marketData,
+          });
         });
       }
 
