@@ -30,7 +30,6 @@ export default class OddsController {
   async saveMarkets() {
     setInterval(async () => {
       const markets = await marketRepository.search().return.all();
-      console.log(markets.length);
       if (markets.length > 0) {
         markets.map((market: any) => {
           redisReplica
@@ -50,13 +49,15 @@ export default class OddsController {
                 });
                 marketData.runners = convertedData;
                 if (!_.isEqual(market.runners, marketData.runners)) {
-                  console.log("changed");
                   this.io.to(market.matchId).emit("getMarketData", {
                     ...market,
                     ...marketData,
                   });
+                  this.io.to(market.marketId).emit("getMarketData", {
+                    ...market,
+                    ...marketData,
+                  });
                 }
-                console.log("==========");
 
                 await marketRepository.save(market.marketId, {
                   ...market,
