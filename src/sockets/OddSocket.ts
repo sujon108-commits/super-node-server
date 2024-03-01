@@ -31,10 +31,6 @@ class OddSocket {
             ...market,
             runners: marketData,
           });
-          this.io.to(market.marketId).emit("getMarketData", {
-            ...market,
-            runners: marketData,
-          });
         });
       }
 
@@ -61,8 +57,23 @@ class OddSocket {
       }
     });
 
-    this.socket.on("joinMarketRoom", (room) => {
+    this.socket.on("joinMarketRoom", async (room) => {
       this.socket.join(room);
+      const market = await marketRepository
+        .search()
+        .where("marketId")
+        .eq(room)
+        .return.first();
+
+      if (market) {
+        //@ts-expect-error
+        const marketData = OddSocket.convertDataToMarket(market as IMarket);
+
+        this.io.to(market.marketId).emit("getMarketData", {
+          ...market,
+          runners: marketData,
+        });
+      }
     });
 
     this.socket.on("leaveRoom", async (matchId: string) => {
