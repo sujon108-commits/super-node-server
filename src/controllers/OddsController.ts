@@ -109,6 +109,7 @@ export default class OddsController {
                   this.io.emit("getFancyData-new", {
                     ...fancy,
                     ...fancyData,
+                    marketId: `${matchId}-${fancy.SelectionId}`,
                   });
                 }
 
