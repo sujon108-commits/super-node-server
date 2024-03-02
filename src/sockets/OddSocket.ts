@@ -26,7 +26,10 @@ class OddSocket {
       if (markets.length > 0) {
         markets.map((market) => {
           //@ts-expect-error
-          const marketData = OddSocket.convertDataToMarket(market as IMarket);
+          const marketData = OddSocket.convertDataToMarket({
+            ...market,
+            join: true,
+          } as IMarket);
           this.io.to(matchId).emit("getMarketData", {
             ...market,
             runners: marketData,
@@ -87,6 +90,8 @@ class OddSocket {
     return marketData?.runners?.map(
       ({ selectionId, ex, status, ...restRunner }: IRunnerType) => {
         const backLength = checkOddsLength - ex?.availableToBack?.length! ?? 0;
+        //@ts-expect-error
+        const newAvailableToBack = [].concat(ex?.availableToBack);
         if (backLength) {
           for (let k = 0; k < backLength; k++) {
             ex?.availableToBack.push({ price: "-", size: "-" });
@@ -99,14 +104,19 @@ class OddSocket {
             ex?.availableToLay.push({ price: "-", size: "-" });
           }
         }
+
         return {
           ...restRunner,
           selectionId,
           runnerName: restRunner.runner || restRunner.runnerName,
           status,
-          back: ex?.availableToBack.reverse(),
+          //@ts-ignore
+          back: newAvailableToBack.reverse(),
           lay: ex?.availableToLay,
-          ex,
+          ex: {
+            availableToBack: newAvailableToBack.reverse(),
+            availableToLay: ex?.availableToLay,
+          },
         };
       }
     );
