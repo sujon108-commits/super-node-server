@@ -299,5 +299,25 @@ class OddsController {
       });
     }
   }
+
+  public static getSeriesListRedis = async (
+    req: Request,
+    res: Response
+  ): Promise<any> => {
+    const { sportsId } = req.params;
+    try {
+      const seriesList: any = await redisReplica.get(
+        `complete-match-list-${sportsId}`
+      );
+      return res.json({
+        message: "Series Updated Successfully",
+        data: JSON.parse(seriesList),
+      });
+    } catch (e: any) {
+      return res.json({
+        sports: [],
+      });
+    }
+  };
 }
 export default OddsController;
