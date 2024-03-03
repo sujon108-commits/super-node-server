@@ -38,11 +38,14 @@ export default class OddsController {
               if (value) {
                 const marketData = JSON.parse(value);
 
-                marketData.runners = marketData.runners.map((runner: any) => ({
-                  ...runner,
-                  runnerName: runner.runner || runner.runnerName,
-                  selectionId: runner.selectionId.toString(),
-                }));
+                marketData.runners = marketData.runners.map((runner: any) => {
+                  runner.ex.availableToBack.reverse();
+                  return {
+                    ...runner,
+                    runnerName: runner.runner || runner.runnerName,
+                    selectionId: runner.selectionId.toString(),
+                  };
+                });
                 const convertedData = OddSocket.convertDataToMarket({
                   ...market,
                   ...marketData,
