@@ -23,7 +23,6 @@ class App {
 
   loadServer = async () => {
     this.server = createServer(this.app);
-    const allowedOrigins = ["http://localhost:3000"];
 
     const options: cors.CorsOptions = {
       origin: "*",
@@ -35,8 +34,23 @@ class App {
 
     this.app.use("/api/", router);
 
+    const allowedOrigin = [
+      "https://saphiregames.com",
+      "https://setbet247.com",
+      "http://localhost",
+      "http://localhost:3000",
+    ];
+
     const io = Websocket.getInstance(this.server);
     io.on("connection", (socket: Socket) => {
+      const origin = socket.handshake.headers.origin;
+      if (!allowedOrigin.includes(origin!)) {
+        // Reject the connection from an unauthorized origin
+        socket.emit("You are not authorized");
+        console.log(`Unauthorized connection rejected from: ${origin}`);
+        socket.disconnect();
+        return;
+      }
       console.log(`New connection: ${socket.id}`);
       new OddSocket(socket);
     });
