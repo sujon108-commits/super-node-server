@@ -37,6 +37,7 @@ class App {
     const allowedOrigin = [
       "https://saphiregames.com",
       "https://setbet247.com",
+      "https://vapbetting.com",
       "http://localhost",
       "http://localhost:3000",
     ];
