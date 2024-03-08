@@ -57,7 +57,7 @@ export default class CasinoController extends ApiController {
                 `Superover-t1-${t1.mid}`
               );
               const { scoreCards: scoreCard } = scoreData;
-              scoreCards = JSON.parse(scoreCard);
+              scoreCards = JSON.parse(scoreCard).scoreCard;
             }
             const marketData = marketFormatter(markets, cloneJsonData);
 
