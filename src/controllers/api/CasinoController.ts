@@ -50,14 +50,14 @@ export default class CasinoController extends ApiController {
                 `fivewicket-t1-${t1.mid}`
               );
               const { scoreCard } = scoreData;
-              scoreCards = scoreCard;
+              scoreCards = JSON.parse(scoreCard);
             }
             if (type === "Superover") {
               const scoreData = await redisReplica.hGetAll(
                 `Superover-t1-${t1.mid}`
               );
-              const { scoreCard } = scoreData;
-              scoreCards = scoreCard;
+              const { scoreCards: scoreCard } = scoreData;
+              scoreCards = JSON.parse(scoreCard);
             }
             const marketData = marketFormatter(markets, cloneJsonData);
 
