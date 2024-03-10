@@ -319,5 +319,67 @@ class OddsController {
       });
     }
   };
+
+  public static async getResults(
+    req: Request,
+    res: Response
+  ): Promise<Response> {
+    const { MarketID } = req.query;
+
+    try {
+      if (!MarketID) throw Error("MarketID is required field");
+
+      const getDataFromBetFair = await api.get(
+        `https://ero.betfair.com/www/sports/exchange/readonly/v1/bymarket?_ak=nzIFcwyWhrlwYMrh&alt=json&currencyCode=USD&locale=en_GB&marketIds=${MarketID}&rollupLimit=1&rollupModel=STAKE&types=MARKET_STATE,MARKET_RATES,MARKET_DESCRIPTION,EVENT,RUNNER_DESCRIPTION,RUNNER_STATE,RUNNER_EXCHANGE_PRICES_BEST,RUNNER_METADATA,MARKET_LICENCE,MARKET_LINE_RANGE_INFO,RUNNER_PRICE_TREND`
+      );
+
+      const data = getDataFromBetFair.data.eventTypes.map((events: any) => {
+        return events.eventNodes
+          .map((event: any) => {
+            const marketData = event.marketNodes;
+            return marketData.reduce((acc: any, market: any) => {
+              const runners = market.runners.map((runner: any) => {
+                return {
+                  selectionId: runner.selectionId,
+                  runner: runner.description.runnerName,
+                  status: runner.state.status,
+                  lastPriceTraded: 0,
+                  ex: {
+                    availableToBack: [],
+                    availableToLay: [],
+                  },
+                  back: [],
+                  lay: [],
+                };
+              });
+              if (market.state.status === "CLOSED")
+                acc.push({
+                  eventid: event.eventId,
+                  marketId: market.marketId,
+                  market: market.description.marketName,
+                  updateTime: market.description.marketTime,
+                  status: market.state.status,
+                  inplay: market.state.inplay,
+                  totalMatched: 0,
+                  active: true,
+                  markettype: "ODDS",
+                  runners,
+                });
+
+              return acc;
+            }, []);
+          })
+          .flat();
+      });
+
+      return res.json({
+        sports: data.flat(),
+      });
+    } catch (e: any) {
+      return res.json({
+        error: e.message,
+      });
+    }
+  }
 }
 export default OddsController;
