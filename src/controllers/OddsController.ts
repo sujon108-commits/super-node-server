@@ -96,6 +96,7 @@ export default class OddsController {
                   max: +fancy.max,
                   sr_no: +fancy.sr_no,
                   ballsess: +fancy.ballsess,
+                  LayPrice1: parseFloat(fancy.LayPrice1),
                 };
                 const fancyRedis = await fancyRepository.fetch(
                   `${matchId}-${fancy.SelectionId}`
@@ -104,7 +105,15 @@ export default class OddsController {
                 delete fancyRedis[EntityId];
                 delete fancyRedis[EntityKeyName];
 
-                if (!_.isEqual(fancyRedis, { ...fancy, matchId })) {
+                if (
+                  !_.isEqual(
+                    {
+                      ...fancyRedis,
+                      LayPrice1: parseFloat(fancyRedis.LayPrice1 as string),
+                    },
+                    { ...fancy, matchId }
+                  )
+                ) {
                   const fancyData = MatchController.createFancyDataAsMarket({
                     ...fancyRedis,
                     ...fancy,
