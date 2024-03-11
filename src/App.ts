@@ -75,6 +75,7 @@ class App {
     const isWhitelisted = this.allowedOrigin.some((allowedOrigin) =>
       allowedOrigin.includes(origin)
     );
+    console.log(origin, isWhitelisted);
 
     if (isWhitelisted) {
       // Allow the request if the origin is in the whitelist
