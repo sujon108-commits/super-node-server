@@ -48,13 +48,13 @@ class App {
     const io = Websocket.getInstance(this.server);
     io.on("connection", (socket: Socket) => {
       const origin = socket.handshake.headers.origin;
-      if (!this.allowedOrigin.includes(origin!)) {
-        // Reject the connection from an unauthorized origin
-        socket.emit("You are not authorized");
-        console.log(`Unauthorized connection rejected from: ${origin}`);
-        socket.disconnect();
-        return;
-      }
+      // if (!this.allowedOrigin.includes(origin!)) {
+      //   // Reject the connection from an unauthorized origin
+      //   socket.emit("You are not authorized");
+      //   console.log(`Unauthorized connection rejected from: ${origin}`);
+      //   socket.disconnect();
+      //   return;
+      // }
       console.log(`New connection: ${socket.id}`);
       socket.join("getMarkets");
       new OddSocket(socket);
