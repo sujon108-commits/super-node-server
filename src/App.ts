@@ -16,6 +16,7 @@ class App {
   port: string | undefined;
   server: Server | undefined;
   allowedOrigin = [
+    "https://marketapi.store",
     "https://saphiregames.com",
     "https://setbet247.com",
     "https://vapbetting.com",
