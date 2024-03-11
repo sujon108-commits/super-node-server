@@ -80,7 +80,7 @@ class App {
 
     if (isWhitelisted) {
       // Allow the request if the origin is in the whitelist
-      res.setHeader("Access-Control-Allow-Origin", origin);
+      // res.setHeader("Access-Control-Allow-Origin", origin);
       next();
     } else {
       // Deny the request if the origin is not in the whitelist
