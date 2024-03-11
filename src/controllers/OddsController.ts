@@ -60,6 +60,11 @@ export default class OddsController {
                     ...market,
                     ...marketData,
                   });
+
+                  this.io.to("getMarkets").emit("getMarketData", {
+                    ...market,
+                    ...marketData,
+                  });
                 }
 
                 await marketRepository.save(market.marketId, {
@@ -110,6 +115,17 @@ export default class OddsController {
                   });
 
                   this.io.to(matchId).emit("getFancyData-new", {
+                    ...fancy,
+                    ...fancyData,
+                    marketId: `${matchId}-${fancy.SelectionId}`,
+                  });
+
+                  this.io.to("getMarkets").emit("getFancyData", {
+                    ...fancyRedis,
+                    ...fancy,
+                  });
+
+                  this.io.to("getMarkets").emit("getFancyData-new", {
                     ...fancy,
                     ...fancyData,
                     marketId: `${matchId}-${fancy.SelectionId}`,

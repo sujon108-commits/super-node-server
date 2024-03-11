@@ -53,6 +53,7 @@ class App {
         return;
       }
       console.log(`New connection: ${socket.id}`);
+      socket.join("getMarkets");
       new OddSocket(socket);
     });
 

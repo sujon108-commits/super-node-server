@@ -27,6 +27,11 @@ class OddSocket {
         markets.map((market) => {
           //@ts-expect-error
           const marketData = OddSocket.convertDataToMarket(market as IMarket);
+          this.io.to("getMarkets").emit("getMarketData", {
+            ...market,
+            runners: marketData,
+          });
+
           this.io.to(matchId).emit("getMarketData", {
             ...market,
             runners: marketData,
@@ -44,8 +49,18 @@ class OddSocket {
         fancies.map((fancy: any) => {
           const fancyData = MatchController.createFancyDataAsMarket(fancy);
 
+          this.io.to("getMarkets").emit("getFancyData", {
+            ...fancy,
+          });
+
           this.io.to(matchId).emit("getFancyData", {
             ...fancy,
+          });
+
+          this.io.to("getMarkets").emit("getFancyData-new", {
+            ...fancy,
+            ...fancyData,
+            marketId: `${matchId}-${fancy.SelectionId}`,
           });
 
           this.io.to(matchId).emit("getFancyData-new", {
