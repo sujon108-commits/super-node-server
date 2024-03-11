@@ -23,6 +23,7 @@ class App {
     "http://localhost",
     "http://localhost:3000",
     "http://localhost:3025",
+    "http://localhost:3001",
   ];
 
   constructor() {
