@@ -13,6 +13,9 @@ class OddSocket {
   }
 
   onMessage() {
+    this.socket.on("joinServerRoom", async (room: string) => {
+      this.socket.join(room);
+    });
     this.socket.on("joinRoom", async (matchId: string) => {
       this.socket.join(matchId);
       matchId = matchId.toString();
