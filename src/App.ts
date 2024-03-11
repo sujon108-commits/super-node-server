@@ -37,7 +37,7 @@ class App {
       origin: "*",
     };
     this.app.use(cors(options));
-    this.app.use(this.whitelistOrigin);
+    // this.app.use(this.whitelistOrigin);
 
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
