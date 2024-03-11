@@ -97,6 +97,9 @@ export default class OddsController {
                   sr_no: +fancy.sr_no,
                   ballsess: +fancy.ballsess,
                   LayPrice1: parseFloat(fancy.LayPrice1),
+                  LaySize1: parseFloat(fancy.LaySize1),
+                  BackSize1: parseFloat(fancy.BackSize1),
+                  BackPrice1: parseFloat(fancy.BackPrice1),
                 };
                 const fancyRedis = await fancyRepository.fetch(
                   `${matchId}-${fancy.SelectionId}`
@@ -110,6 +113,9 @@ export default class OddsController {
                     {
                       ...fancyRedis,
                       LayPrice1: parseFloat(fancyRedis.LayPrice1 as string),
+                      LaySize1: parseFloat(fancyRedis.LaySize1 as string),
+                      BackPrice1: parseFloat(fancyRedis.BackPrice1 as string),
+                      BackSize1: parseFloat(fancyRedis.BackSize1 as string),
                     },
                     { ...fancy, matchId }
                   )
