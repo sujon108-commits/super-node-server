@@ -39,7 +39,8 @@ export default class OddsController {
                 const marketData = JSON.parse(value);
 
                 marketData.runners = marketData.runners.map((runner: any) => {
-                  runner.ex.availableToBack = runner.back;
+                  if (runner.back && runner.back.length > 0)
+                    runner.ex.availableToBack = runner.back;
                   return {
                     ...runner,
                     runnerName: runner.runner || runner.runnerName,
