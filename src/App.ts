@@ -19,7 +19,7 @@ class App {
     "https://marketapi.store",
     "https://saphiregames.com",
     "https://setbet247.com",
-    "https://vapbetting.com",
+    // "https://vapbetting.com",
     "http://localhost",
     "http://localhost:3000",
     "http://localhost:3025",
