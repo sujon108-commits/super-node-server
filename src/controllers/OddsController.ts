@@ -41,6 +41,7 @@ export default class OddsController {
                 marketData.runners = marketData.runners.map((runner: any) => {
                   if (runner.back && runner.back.length > 0)
                     runner.ex.availableToBack = runner.back;
+                  else runner.ex.availableToBack.reverse();
                   return {
                     ...runner,
                     runnerName: runner.runner || runner.runnerName,

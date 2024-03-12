@@ -47,12 +47,12 @@ class App {
 
     const io = Websocket.getInstance(this.server);
     io.on("connection", (socket: Socket) => {
-      const origin = socket.handshake.headers.host;
+      const origin = socket.handshake.headers.origin;
       const isWhitelisted = this.allowedOrigin.some((allowedOrigin) =>
         allowedOrigin.includes(origin!)
       );
 
-      if (!isWhitelisted) {
+      if (origin && !isWhitelisted) {
         // Reject the connection from an unauthorized origin
         socket.emit("You are not authorized");
         console.log(`Unauthorized connection rejected from: ${origin}`);
@@ -76,10 +76,11 @@ class App {
   };
 
   whitelistOrigin = (req: Request, res: Response, next: NextFunction) => {
-    const origin = req.headers.host!;
+    // const origin = req.headers.host!;
+    const origin = req.get("origin");
 
     const isWhitelisted = this.allowedOrigin.some((allowedOrigin) =>
-      allowedOrigin.includes(origin)
+      allowedOrigin.includes(origin!)
     );
 
     if (origin !== "marketapi.store") console.log(origin, isWhitelisted);
