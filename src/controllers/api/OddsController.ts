@@ -99,9 +99,10 @@ class OddsController {
       if (!SelectionId) throw Error("SelectionId is required field");
 
       let response: any = await redisReplica.get(`fancy-${MatchID}`);
+
       response = response ? { data: JSON.parse(response) } : { data: [] };
       const market = response.data.filter(
-        (m: any) => m.SelectionId === SelectionId
+        (m: any) => m.SelectionId == SelectionId
       );
 
       return res.json({
