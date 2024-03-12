@@ -38,7 +38,7 @@ class App {
       origin: "*",
     };
     this.app.use(cors(options));
-    //this.app.use(this.whitelistOrigin);
+    this.app.use(this.whitelistOrigin);
 
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
@@ -47,14 +47,18 @@ class App {
 
     const io = Websocket.getInstance(this.server);
     io.on("connection", (socket: Socket) => {
-      const origin = socket.handshake.headers.origin;
-      // if (!this.allowedOrigin.includes(origin!)) {
-      //   // Reject the connection from an unauthorized origin
-      //   socket.emit("You are not authorized");
-      //   console.log(`Unauthorized connection rejected from: ${origin}`);
-      //   socket.disconnect();
-      //   return;
-      // }
+      const origin = socket.handshake.headers.host;
+      const isWhitelisted = this.allowedOrigin.some((allowedOrigin) =>
+        allowedOrigin.includes(origin!)
+      );
+
+      if (!isWhitelisted) {
+        // Reject the connection from an unauthorized origin
+        socket.emit("You are not authorized");
+        console.log(`Unauthorized connection rejected from: ${origin}`);
+        socket.disconnect();
+        return;
+      }
       console.log(`New connection: ${socket.id}`);
       socket.join("getMarkets");
       new OddSocket(socket);
@@ -77,7 +81,8 @@ class App {
     const isWhitelisted = this.allowedOrigin.some((allowedOrigin) =>
       allowedOrigin.includes(origin)
     );
-    console.log(origin, isWhitelisted);
+
+    if (origin !== "marketapi.store") console.log(origin, isWhitelisted);
 
     if (isWhitelisted) {
       // Allow the request if the origin is in the whitelist

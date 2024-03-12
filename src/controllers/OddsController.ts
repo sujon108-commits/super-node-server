@@ -39,7 +39,7 @@ export default class OddsController {
                 const marketData = JSON.parse(value);
 
                 marketData.runners = marketData.runners.map((runner: any) => {
-                  runner.ex.availableToBack.reverse();
+                  runner.ex.availableToBack = runner.back;
                   return {
                     ...runner,
                     runnerName: runner.runner || runner.runnerName,
@@ -89,26 +89,6 @@ export default class OddsController {
             if (value) {
               const fancies = JSON.parse(value);
               fancies.map(async (fancy: any) => {
-                fancy = {
-                  ...fancy,
-                  SelectionId: +fancy.SelectionId,
-                  min: +fancy.min,
-                  max: +fancy.max,
-                  sr_no: +fancy.sr_no,
-                  ballsess: +fancy.ballsess,
-                  LayPrice1: parseFloat(fancy.LayPrice1),
-                  LaySize1: parseFloat(fancy.LaySize1),
-                  LayPrice2: parseFloat(fancy.LayPrice2),
-                  LaySize2: parseFloat(fancy.LaySize2),
-                  LayPrice3: parseFloat(fancy.LayPrice3),
-                  LaySize3: parseFloat(fancy.LaySize3),
-                  BackSize1: parseFloat(fancy.BackSize1),
-                  BackPrice1: parseFloat(fancy.BackPrice1),
-                  BackSize2: parseFloat(fancy.BackSize2),
-                  BackPrice2: parseFloat(fancy.BackPrice2),
-                  BackSize3: parseFloat(fancy.BackSize3),
-                  BackPrice3: parseFloat(fancy.BackPrice3),
-                };
                 const fancyRedis = await fancyRepository.fetch(
                   `${matchId}-${fancy.SelectionId}`
                 );
@@ -120,18 +100,6 @@ export default class OddsController {
                   !_.isEqual(
                     {
                       ...fancyRedis,
-                      LayPrice1: parseFloat(fancyRedis.LayPrice1 as string),
-                      LaySize1: parseFloat(fancyRedis.LaySize1 as string),
-                      LayPrice2: parseFloat(fancyRedis.LayPrice2 as string),
-                      LaySize2: parseFloat(fancyRedis.LaySize2 as string),
-                      LayPrice3: parseFloat(fancyRedis.LayPrice3 as string),
-                      LaySize3: parseFloat(fancyRedis.LaySize3 as string),
-                      BackPrice1: parseFloat(fancyRedis.BackPrice1 as string),
-                      BackSize1: parseFloat(fancyRedis.BackSize1 as string),
-                      BackPrice2: parseFloat(fancyRedis.BackPrice2 as string),
-                      BackSize2: parseFloat(fancyRedis.BackSize2 as string),
-                      BackPrice3: parseFloat(fancyRedis.BackPrice3 as string),
-                      BackSize3: parseFloat(fancyRedis.BackSize3 as string),
                     },
                     { ...fancy, matchId }
                   )
