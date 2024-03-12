@@ -91,6 +91,14 @@ export default class OddsController {
             if (value) {
               const fancies = JSON.parse(value);
               fancies.map(async (fancy: any) => {
+                fancy = {
+                  ...fancy,
+                  SelectionId: +fancy.SelectionId,
+                  min: +fancy.min,
+                  max: +fancy.max,
+                  sr_no: +fancy.sr_no,
+                  ballsess: +fancy.ballsess,
+                };
                 const fancyRedis = await fancyRepository.fetch(
                   `${matchId}-${fancy.SelectionId}`
                 );
