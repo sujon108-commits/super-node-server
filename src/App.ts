@@ -10,6 +10,7 @@ import { Socket } from "socket.io";
 import OddSocket from "./sockets/OddSocket";
 import { SuperNodeSocket } from "./sockets/super-node";
 import { initCasinoSocket } from "./sockets/casino-node";
+const requestIp = require('request-ip');
 
 class App {
   app: Express;
@@ -25,6 +26,11 @@ class App {
     "http://localhost:3025",
     "http://localhost:3001",
     "https://batmagic.club",
+  ];
+
+  allowedIps = [
+    "143.110.183.41",
+    "174.138.120.77"
   ];
 
   constructor() {
@@ -83,10 +89,13 @@ class App {
     const isWhitelisted = this.allowedOrigin.some((allowedOrigin) =>
       allowedOrigin.includes(origin!)
     );
-
+    const clientIp = requestIp.getClientIp(req);
+    const isWhiteListedIp = this.allowedIps.some((allowedIps) =>
+      allowedIps.includes(clientIp!)
+    )
     if (origin !== "marketapi.store") console.log(origin, isWhitelisted);
 
-    if (isWhitelisted) {
+    if (isWhitelisted || isWhiteListedIp) {
       // Allow the request if the origin is in the whitelist
       // res.setHeader("Access-Control-Allow-Origin", origin);
       next();
