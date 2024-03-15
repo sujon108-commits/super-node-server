@@ -10,7 +10,7 @@ import { Socket } from "socket.io";
 import OddSocket from "./sockets/OddSocket";
 import { SuperNodeSocket } from "./sockets/super-node";
 import { initCasinoSocket } from "./sockets/casino-node";
-const requestIp = require('request-ip');
+const requestIp = require("request-ip");
 
 class App {
   app: Express;
@@ -20,19 +20,25 @@ class App {
     "https://marketapi.store",
     "https://saphiregames.com",
     "https://setbet247.com",
-    // "https://vapbetting.com",
+    "https://vapbetting.com",
     "http://localhost",
     "http://localhost:3000",
     "http://localhost:3025",
     "http://localhost:3001",
     "https://batmagic.club",
+    "https://win2c.com",
   ];
 
   allowedIps = [
-    "143.110.183.41",
-    "174.138.120.77",
-    "65.0.232.211",
-    "172.31.34.130"
+    "143.110.183.41", //sap
+    "174.138.120.77", //sap
+    "65.0.232.211", // batmagic
+    "172.31.34.130", // batmagic
+    "81.16.28.169", // vapbetting
+    "139.59.0.175", // setbet247
+    "64.225.86.229", // setbet247
+    "172.31.2.243", //win2c
+    "13.200.232.130", //win2c
   ];
 
   constructor() {
@@ -94,7 +100,7 @@ class App {
     const clientIp = requestIp.getClientIp(req);
     const isWhiteListedIp = this.allowedIps.some((allowedIps) =>
       allowedIps.includes(clientIp!)
-    )
+    );
     if (origin !== "marketapi.store") console.log(origin, isWhitelisted);
 
     if (isWhitelisted || isWhiteListedIp) {
