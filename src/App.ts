@@ -99,6 +99,7 @@ class App {
       allowedOrigin.includes(origin!)
     );
     const clientIp = requestIp.getClientIp(req);
+    console.log(clientIp)
     const isWhiteListedIp = this.allowedIps.some((allowedIps) =>
       allowedIps.includes(clientIp!)
     );
