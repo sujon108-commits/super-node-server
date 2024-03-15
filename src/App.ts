@@ -99,11 +99,13 @@ class App {
       allowedOrigin.includes(origin!)
     );
     const clientIp = requestIp.getClientIp(req);
-    console.log(clientIp)
+    if (!origin) {
+      console.log(clientIp)
+    }
     const isWhiteListedIp = this.allowedIps.some((allowedIps) =>
       allowedIps.includes(clientIp!)
     );
-    if (origin !== "marketapi.store") console.log(origin, isWhitelisted);
+    ///if (origin !== "marketapi.store") console.log(origin, isWhitelisted);
 
     if (isWhitelisted || isWhiteListedIp) {
       // Allow the request if the origin is in the whitelist
