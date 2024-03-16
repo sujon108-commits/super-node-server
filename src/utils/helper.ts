@@ -30,8 +30,10 @@ const marketFormatter = (t2: any, marketJson: any) => {
         });
       }
       if (
-        marketJson.slug === "worliinstant" ||
-        marketJson.slug === "worlimatka"
+        (marketJson.slug === "worliinstant" ||
+          marketJson.slug === "worlimatka") &&
+        t2 &&
+        t2.length > 0
       ) {
         eventMarket.Runners.push({
           ...ItemRunner,

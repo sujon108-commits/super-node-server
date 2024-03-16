@@ -35,8 +35,7 @@ class App {
     "65.0.232.211", // batmagic
     "172.31.34.130", // batmagic
     "81.16.28.169", // vapbetting
-    "103.87.58.60", // vapbetting
-    "2a02:4780:d:ba3b::1",// vapbetting
+    "2a02:4780:d:ba3b::1", // vapbetting
     "139.59.0.175", // setbet247
     "64.225.86.229", // setbet247
     "172.31.2.243", //win2c
@@ -101,7 +100,7 @@ class App {
     );
     const clientIp = requestIp.getClientIp(req);
     if (!origin) {
-      console.log(clientIp)
+      console.log(clientIp);
     }
     const isWhiteListedIp = this.allowedIps.some((allowedIps) =>
       allowedIps.includes(clientIp!)

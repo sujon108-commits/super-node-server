@@ -49,15 +49,19 @@ export default class CasinoController extends ApiController {
               const scoreData = await redisReplica.hGetAll(
                 `fivewicket-t1-${t1.mid}`
               );
-              const { scoreCard } = scoreData;
-              scoreCards = JSON.parse(scoreCard);
+              if (scoreData) {
+                const { scoreCard } = scoreData;
+                scoreCards = JSON.parse(scoreCard);
+              }
             }
             if (type === "Superover") {
               const scoreData = await redisReplica.hGetAll(
                 `Superover-t1-${t1.mid}`
               );
-              const { scoreCards: scoreCard } = scoreData;
-              scoreCards = JSON.parse(scoreCard).scoreCard;
+              if (scoreData) {
+                const { scoreCards: scoreCard } = scoreData;
+                scoreCards = JSON.parse(scoreCard).scoreCard;
+              }
             }
             const marketData = marketFormatter(markets, cloneJsonData);
 
