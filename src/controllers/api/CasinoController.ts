@@ -51,7 +51,7 @@ export default class CasinoController extends ApiController {
               );
               if (scoreData) {
                 const { scoreCard } = scoreData;
-                scoreCards = JSON.parse(scoreCard);
+                if (scoreCard) scoreCards = JSON.parse(scoreCard);
               }
             }
             if (type === "Superover") {
