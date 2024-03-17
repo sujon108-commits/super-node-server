@@ -20,7 +20,7 @@ class App {
     "https://marketapi.store",
     "https://saphiregames.com",
     "https://setbet247.com",
-    "https://vapbetting.com",
+    //"https://vapbetting.com",
     "http://localhost",
     "http://localhost:3000",
     "http://localhost:3025",
@@ -34,8 +34,8 @@ class App {
     "174.138.120.77", //sap
     "65.0.232.211", // batmagic
     "172.31.34.130", // batmagic
-    "81.16.28.169", // vapbetting
-    "2a02:4780:d:ba3b::1", // vapbetting
+    // "81.16.28.169", // vapbetting
+    //"2a02:4780:d:ba3b::1", // vapbetting
     "139.59.0.175", // setbet247
     "64.225.86.229", // setbet247
     "172.31.2.243", //win2c
