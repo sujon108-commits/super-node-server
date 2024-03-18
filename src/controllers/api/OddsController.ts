@@ -183,19 +183,22 @@ class OddsController {
     res: Response
   ): Promise<Response> {
     try {
-      let matchList = [];
-
-      const data = await redisReplica.get(`getMatchList-T10`);
-      if (data) matchList = JSON.parse(data);
-
-      if (!data) {
-        const res = await api.get(`/get-matches-t10`);
-        matchList = res.data.sports;
-      }
-
+      let matchList: any = [];
       return res.json({
         sports: matchList,
       });
+
+      // const data = await redisReplica.get(`getMatchList-T10`);
+      // if (data) matchList = JSON.parse(data);
+
+      // if (!data) {
+      //   const res = await api.get(`/get-matches-t10`);
+      //   matchList = res.data.sports;
+      // }
+
+      // return res.json({
+      //   sports: matchList,
+      // });
     } catch (e: any) {
       return res.json({
         sports: [],
