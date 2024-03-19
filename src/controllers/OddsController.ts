@@ -53,21 +53,21 @@ export default class OddsController {
                   ...marketData,
                 });
                 marketData.runners = convertedData;
-                if (!_.isEqual(market.runners, marketData.runners)) {
-                  this.io.to(market.matchId).emit("getMarketData", {
-                    ...market,
-                    ...marketData,
-                  });
-                  this.io.to(market.marketId).emit("getMarketData", {
-                    ...market,
-                    ...marketData,
-                  });
+                // if (!_.isEqual(market.runners, marketData.runners)) {
+                this.io.to(market.matchId).emit("getMarketData", {
+                  ...market,
+                  ...marketData,
+                });
+                this.io.to(market.marketId).emit("getMarketData", {
+                  ...market,
+                  ...marketData,
+                });
 
-                  this.io.to("getMarkets").emit("getMarketData", {
-                    ...market,
-                    ...marketData,
-                  });
-                }
+                this.io.to("getMarkets").emit("getMarketData", {
+                  ...market,
+                  ...marketData,
+                });
+                // }
 
                 await marketRepository.save(market.marketId, {
                   ...market,

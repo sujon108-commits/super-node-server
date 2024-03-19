@@ -17,8 +17,9 @@ class OddSocket {
       this.socket.join(room);
     });
     this.socket.on("joinRoom", async (matchId: string) => {
-      this.socket.join(matchId);
       matchId = matchId.toString();
+      this.socket.join(matchId);
+
       this.socket.join(matchId);
       const markets = await marketRepository
         .search()
