@@ -68,15 +68,15 @@ class App {
         allowedOrigin.includes(origin!)
       );
 
-      if (origin && !isWhitelisted) {
-        // Reject the connection from an unauthorized origin
-        socket.emit("You are not authorized");
-        console.log(`Unauthorized connection rejected from: ${origin}`);
-        socket.disconnect();
-        return;
-      }
+      // if (origin && !isWhitelisted) {
+      //   // Reject the connection from an unauthorized origin
+      //   socket.emit("You are not authorized");
+      //   console.log(`Unauthorized connection rejected from: ${origin}`);
+      //   socket.disconnect();
+      //   return;
+      // }
       console.log(`New connection: ${socket.id}`);
-      socket.join("getMarkets");
+      //socket.join("getMarkets");
       new OddSocket(socket);
     });
 
