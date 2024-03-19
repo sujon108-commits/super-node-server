@@ -35,7 +35,7 @@ class OddSocket {
             runners: marketData,
           });
 
-          this.io.to(matchId).emit("getMarketData", {
+          this.socket.emit("getMarketData", {
             ...market,
             runners: marketData,
           });
@@ -56,7 +56,7 @@ class OddSocket {
             ...fancy,
           });
 
-          this.io.to(matchId).emit("getFancyData", {
+          this.socket.emit("getFancyData", {
             ...fancy,
           });
 
@@ -66,7 +66,7 @@ class OddSocket {
             marketId: `${matchId}-${fancy.SelectionId}`,
           });
 
-          this.io.to(matchId).emit("getFancyData-new", {
+          this.socket.emit("getFancyData-new", {
             ...fancy,
             ...fancyData,
             marketId: `${matchId}-${fancy.SelectionId}`,
