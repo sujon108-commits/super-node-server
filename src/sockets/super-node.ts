@@ -19,6 +19,8 @@ export function SuperNodeSocket() {
     clientIo.emit("newFancyAdded", fancy);
   });
 
+  socket.on("getMarketData-Super", (market) => {});
+
   socket.on("deactivateFancy-Super", (fancy) => {
     if (Object.keys(fancy).length > 0) {
       Object.keys(fancy).map((matchId) => {
