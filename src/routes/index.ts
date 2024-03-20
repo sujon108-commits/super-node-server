@@ -21,6 +21,7 @@ router.get("/get-bookmaker-marketes", OddsController.getMarketList);
 router.get("/get-sessions", OddsController.getSessions);
 router.get("/get-sessions-t10", OddsController.getSessions);
 router.get("/fancy-data", OddsController.fancyData);
+router.get("/market-data", OddsController.marketData);
 router.get("/get-odds-single", OddsController.getMakerOddsSingle);
 router.get("/get-series-redis/:sportsId", OddsController.getSeriesListRedis);
 router.get("/get-odds-result", OddsController.getResults);

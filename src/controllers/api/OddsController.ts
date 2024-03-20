@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { redisReplica } from "../../database/redis";
 import api from "../../utils/api";
+import { marketRepository } from "../../schema/Market";
+import OddSocket from "../../sockets/OddSocket";
 
 class OddsController {
   public static async getSports(
@@ -378,6 +380,41 @@ class OddsController {
 
       return res.json({
         sports: data.flat(),
+      });
+    } catch (e: any) {
+      return res.json({
+        error: e.message,
+      });
+    }
+  }
+
+  public static async marketData(
+    req: Request,
+    res: Response
+  ): Promise<Response> {
+    try {
+      const { MatchID }: any = req.query;
+      if (!MatchID) throw Error("MatchID is required field");
+
+      const markets = await marketRepository
+        .search()
+        .where("matchId")
+        .eq(MatchID.toString())
+        .return.all();
+
+      const marketsOdds = markets.map((market) => {
+        //@ts-expect-error
+        const marketData = OddSocket.convertDataToMarket(market as IMarket);
+
+        return {
+          ...market,
+          runners: marketData,
+        };
+      });
+
+      return res.json({
+        marketsOdds,
+        error: "",
       });
     } catch (e: any) {
       return res.json({
