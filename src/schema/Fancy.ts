@@ -4,8 +4,8 @@ import redis from "../database/redis";
 export const fancySchema = new Schema(
   "Fancy",
   {
-    matchId: { type: "number" },
-    SelectionId: { type: "number" },
+    matchId: { type: "number", sortable: true },
+    SelectionId: { type: "number", sortable: true },
     RunnerName: { type: "string" },
     LayPrice1: { type: "number" },
     LaySize1: { type: "number" },
@@ -20,7 +20,7 @@ export const fancySchema = new Schema(
     BackPrice3: { type: "number" },
     BackSize3: { type: "number" },
     GameStatus: { type: "string" },
-    gtype: { type: "string" },
+    gtype: { type: "string", sortable: true },
     min: { type: "number" },
     max: { type: "number" },
     sr_no: { type: "number" },

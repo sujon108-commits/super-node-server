@@ -4,7 +4,7 @@ import redis from "../database/redis";
 export const marketSchema = new Schema(
   "Market",
   {
-    marketId: { type: "string" },
+    marketId: { type: "string", sortable: true },
     marketName: { type: "string" },
     market: { type: "string" },
     markettype: { type: "string" },
