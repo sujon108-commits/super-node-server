@@ -9,7 +9,7 @@ export const marketSchema = new Schema(
     market: { type: "string" },
     markettype: { type: "string" },
     status: { type: "string" },
-    matchId: { type: "number" },
+    matchId: { type: "number", sortable: true },
     active: { type: "boolean" },
     inplay: { type: "boolean" },
     isDelete: { type: "boolean" },
