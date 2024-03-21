@@ -5,6 +5,8 @@ dotenv.config({
 import App from "./src/App";
 import cluster from "cluster";
 import { cpus } from "os";
+import { redisReplica } from "./src/database/redis";
+import Websocket from "./src/sockets/Socket";
 
 if (cluster.isMaster) {
   const CPUS: any = cpus();
@@ -23,6 +25,20 @@ if (cluster.isMaster) {
 
   cluster.on("exit", (worker: any, code: any, signal: any) => {
     cluster.fork();
+  });
+
+  const io = Websocket.getInstance();
+
+  redisReplica.subscribe("getMarketData", (m: any) => {
+    const market = JSON.parse(m);
+
+    io.to(market.matchId).emit("getMarketData", {
+      ...market,
+    });
+
+    io.to(market.marketId).emit("getMarketData", {
+      ...market,
+    });
   });
 } else {
   App.loadServer();

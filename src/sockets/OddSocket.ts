@@ -4,6 +4,7 @@ import Websocket from "./Socket";
 import { IMarket, IRunnerType } from "../interfaces/MarketModel";
 import { marketRepository } from "../schema/Market";
 import { fancyRepository } from "../schema/Fancy";
+import { redisReplica } from "../database/redis";
 const checkOddsLength = 3;
 class OddSocket {
   io: any;
