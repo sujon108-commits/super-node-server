@@ -22,15 +22,26 @@ class OddSocket {
       this.socket.join(matchId);
 
       this.socket.join(matchId);
-      const markets = await marketRepository
-        .search()
-        .where("matchId")
-        .eq(matchId)
-        .return.all();
+      // const markets = await marketRepository
+      //   .search()
+      //   .where("matchId")
+      //   .eq(matchId)
+      //   .return.all();
 
-      if (markets.length > 0) {
-        markets.map((market) => {
-          //@ts-expect-error
+      const markets: any = await redisReplica.json.get("matchesMarket", {
+        path: matchId,
+      });
+
+      if (markets && markets.length > 0) {
+        markets.map(async (market: any) => {
+          const redisMarket: any = await redisReplica.get(
+            `odds-market-${market.marketId}`
+          );
+
+          if (redisMarket) {
+            const mData = JSON.parse(redisMarket);
+            market = { ...market, ...mData };
+          }
           const marketData = OddSocket.convertDataToMarket(market as IMarket);
           this.io.to("getMarkets").emit("getMarketData", {
             ...market,
@@ -44,37 +55,37 @@ class OddSocket {
         });
       }
 
-      const fancies = await fancyRepository
-        .search()
-        .where("matchId")
-        .eq(matchId)
-        .return.all();
+      // const fancies = await fancyRepository
+      //   .search()
+      //   .where("matchId")
+      //   .eq(matchId)
+      //   .return.all();
 
-      if (fancies.length > 0) {
-        fancies.map((fancy: any) => {
-          const fancyData = MatchController.createFancyDataAsMarket(fancy);
+      // if (fancies.length > 0) {
+      //   fancies.map((fancy: any) => {
+      //     const fancyData = MatchController.createFancyDataAsMarket(fancy);
 
-          this.io.to("getMarkets").emit("getFancyData", {
-            ...fancy,
-          });
+      //     this.io.to("getMarkets").emit("getFancyData", {
+      //       ...fancy,
+      //     });
 
-          this.socket.emit("getFancyData", {
-            ...fancy,
-          });
+      //     this.socket.emit("getFancyData", {
+      //       ...fancy,
+      //     });
 
-          this.io.to("getMarkets").emit("getFancyData-new", {
-            ...fancy,
-            ...fancyData,
-            marketId: `${matchId}-${fancy.SelectionId}`,
-          });
+      //     this.io.to("getMarkets").emit("getFancyData-new", {
+      //       ...fancy,
+      //       ...fancyData,
+      //       marketId: `${matchId}-${fancy.SelectionId}`,
+      //     });
 
-          this.socket.emit("getFancyData-new", {
-            ...fancy,
-            ...fancyData,
-            marketId: `${matchId}-${fancy.SelectionId}`,
-          });
-        });
-      }
+      //     this.socket.emit("getFancyData-new", {
+      //       ...fancy,
+      //       ...fancyData,
+      //       marketId: `${matchId}-${fancy.SelectionId}`,
+      //     });
+      //   });
+      // }
     });
 
     this.socket.on("joinMarketRoom", async (room) => {

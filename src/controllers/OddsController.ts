@@ -13,8 +13,8 @@ export default class OddsController {
   constructor() {
     try {
       this.io = Websocket.getInstance();
-      this.saveMarkets();
-      this.saveFancies();
+      //this.saveMarkets();
+      //this.saveFancies();
     } catch (e) {
       console.log(e);
     }
@@ -68,11 +68,11 @@ export default class OddsController {
                   ...marketData,
                 });
                 // }
-
-                await marketRepository.save(market.marketId, {
-                  ...market,
-                  ...marketData,
-                });
+                // code commented
+                // await marketRepository.save(market.marketId, {
+                //   ...market,
+                //   ...marketData,
+                // });
               }
             })
             .catch(console.log);
