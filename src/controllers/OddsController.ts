@@ -15,6 +15,20 @@ export default class OddsController {
       this.io = Websocket.getInstance();
       //this.saveMarkets();
       //this.saveFancies();
+
+      const io = Websocket.getInstance();
+
+      redisReplica.subscribe("getMarketData", (m: any) => {
+        const market = JSON.parse(m);
+
+        io.to(market.matchId).emit("getMarketData", {
+          ...market,
+        });
+
+        io.to(market.marketId).emit("getMarketData", {
+          ...market,
+        });
+      });
     } catch (e) {
       console.log(e);
     }
