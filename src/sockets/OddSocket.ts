@@ -130,6 +130,7 @@ class OddSocket {
             ex?.availableToLay.push({ price: "-", size: "-" });
           }
         }
+        ex?.availableToBack.reverse();
         return {
           ...restRunner,
           selectionId,
