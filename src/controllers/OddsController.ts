@@ -21,6 +21,11 @@ export default class OddsController {
       redisReplica.subscribe("getMarketData", (m: any) => {
         const market = JSON.parse(m);
 
+        const convertedData = OddSocket.convertDataToMarket({
+          ...market,
+        });
+        market.runners = convertedData;
+
         io.to(market.matchId).emit("getMarketData", {
           ...market,
         });
