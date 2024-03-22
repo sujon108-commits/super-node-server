@@ -1,4 +1,4 @@
-import { redisReplica } from "../database/redis";
+import { redisReplica, redisReplicaSub } from "../database/redis";
 import { matchRepository } from "../schema/Match";
 import { fancyRepository } from "../schema/Fancy";
 import { marketRepository } from "../schema/Market";
@@ -18,9 +18,8 @@ export default class OddsController {
 
       const io = Websocket.getInstance();
 
-      redisReplica.subscribe("getMarketData", (m: any) => {
+      redisReplicaSub.subscribe("getMarketData", (m: any) => {
         const market = JSON.parse(m);
-
         const convertedData = OddSocket.convertDataToMarket({
           ...market,
         });
