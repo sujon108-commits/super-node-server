@@ -108,7 +108,7 @@ class App {
     );
     ///if (origin !== "marketapi.store") console.log(origin, isWhitelisted);
 
-    if (isWhitelisted || isWhiteListedIp || true) {
+    if (isWhitelisted || isWhiteListedIp) {
       // Allow the request if the origin is in the whitelist
       // res.setHeader("Access-Control-Allow-Origin", origin);
       next();
