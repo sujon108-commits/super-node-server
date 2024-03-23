@@ -7,7 +7,7 @@ export const matchSchema = new Schema(
     matchId: { type: "number", sortable: true },
     type: { type: "string" },
   },
-  { dataStructure: "JSON" }
+  { dataStructure: "HASH" }
 );
 
 export const matchRepository = new Repository(matchSchema, redis);

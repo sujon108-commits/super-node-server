@@ -17,10 +17,15 @@ class MatchController {
     try {
       const { matches }: any = req.body;
 
-      if (matches && matches.length > 0 && !matches[0].matchId) {
+      if (
+        matches &&
+        matches.length > 0 &&
+        !matches[0].matchId &&
+        !matches[0].sportId
+      ) {
         return res
           .status(401)
-          .json({ message: "Please send matchId", error: true });
+          .json({ message: "Please send matchId and sportId", error: true });
       }
       const matchIds = matches.map(({ matchId }: any) => matchId.toString());
 
@@ -29,6 +34,7 @@ class MatchController {
           matches: matches.map((match: any) => ({
             ...match,
             matchId: match.matchId.toString(),
+            sportId: match.sportId.toString(),
           })),
         })
         .then((res) => console.log("res"))
@@ -36,128 +42,145 @@ class MatchController {
           console.log("err", e.response, e.config);
         });
 
-      const T10MatchIds = matchIds.filter(
-        (match: string) => match.includes("111") || match.includes("120")
+      const matchWithSportsId = matches.reduce(
+        (acc: any, { sportId, matchId }: any) => {
+          acc[sportId] = acc[sportId] || [];
+          if (!acc[sportId].includes(matchId)) {
+            acc[sportId].push(matchId);
+          }
+          return acc;
+        },
+        {}
       );
-
-      const otherMatchIds = matchIds.filter(
-        (match: string) => !match.includes("111") || !match.includes("120")
-      );
-
-      if (otherMatchIds.length > 0) {
-        const marketsData = MatchController.marketsData(
-          otherMatchIds,
-          `get-marketes?EventID=`
+      Object.keys(matchWithSportsId).map((sportId: string) => {
+        const T10MatchIds = matchWithSportsId[sportId].filter(
+          (match: string) => match.includes("111") || match.includes("120")
         );
 
-        const bookMarketsData = MatchController.marketsData(
-          otherMatchIds,
-          `get-bookmaker-marketes?EventID=`
+        const otherMatchIds = matchWithSportsId[sportId].filter(
+          (match: string) => !match.includes("111") || !match.includes("120")
         );
 
-        if (matchIds.length > 0) {
-          matchIds.map(async (matchId: any) => {
-            await matchRepository.save(matchId, {
-              matchId: +matchId,
+        if (otherMatchIds.length > 0) {
+          const marketsData = MatchController.marketsData(
+            otherMatchIds,
+            `get-marketes?sportId=${sportId}&EventID=`
+          );
+
+          const bookMarketsData = MatchController.marketsData(
+            otherMatchIds,
+            `get-bookmaker-marketes?sportId=${sportId}&EventID=`
+          );
+
+          if (matchIds.length > 0) {
+            matchIds.map(async (matchId: any) => {
+              await matchRepository.save(matchId, {
+                matchId: +matchId,
+              });
             });
-          });
-        }
+          }
 
-        Promise.allSettled([marketsData, bookMarketsData]).then(
-          async (markets: any) => {
-            markets.map((market: { status: string; value: any }) => {
-              if (market.status === "fulfilled") {
-                const keys = Object.keys(market.value);
-                if (keys.length > 0) {
-                  keys.map((key) => {
-                    market.value[key].map(
-                      async (m: {
-                        marketId: string;
-                        marketName: string;
-                        matchId: string;
-                      }) => {
-                        await marketRepository.save(m.marketId, m);
+          Promise.allSettled([marketsData, bookMarketsData]).then(
+            async (markets: any) => {
+              markets.map((market: { status: string; value: any }) => {
+                if (market.status === "fulfilled") {
+                  const keys = Object.keys(market.value);
+                  if (keys.length > 0) {
+                    keys.map((key) => {
+                      market.value[key].map(
+                        async (m: {
+                          marketId: string;
+                          marketName: string;
+                          matchId: string;
+                        }) => {
+                          await marketRepository.save(m.marketId, m);
+                        }
+                      );
+                    });
+                  }
+                }
+              });
+            }
+          );
+
+          if (sportId == "4") {
+            otherMatchIds.map((matchId: string) => {
+              api
+                .get(`get-sessions?MatchID=${matchId}`)
+                .then(async (res: any) => {
+                  res.data.sports.map(async (fancy: any) => {
+                    fancy = {
+                      ...fancy,
+                      SelectionId: +fancy.SelectionId,
+                      min: +fancy.min,
+                      max: +fancy.max,
+                      sr_no: +fancy.sr_no,
+                      ballsess: +fancy.ballsess,
+                    };
+
+                    await fancyRepository.save(
+                      `${matchId}-${fancy.SelectionId}`,
+                      {
+                        ...fancy,
+                        matchId: +matchId,
                       }
                     );
                   });
-                }
-              }
+                })
+                .catch(() => {});
             });
           }
-        );
+        }
 
-        otherMatchIds.map((matchId: string) => {
-          api
-            .get(`get-sessions?MatchID=${matchId}`)
-            .then(async (res: any) => {
-              res.data.sports.map(async (fancy: any) => {
-                fancy = {
-                  ...fancy,
-                  SelectionId: +fancy.SelectionId,
-                  min: +fancy.min,
-                  max: +fancy.max,
-                  sr_no: +fancy.sr_no,
-                  ballsess: +fancy.ballsess,
-                };
+        if (T10MatchIds.length > 0 && sportId == "4") {
+          T10MatchIds.forEach(async (matchId: string) => {
+            const matchData = await matchRepository
+              .search()
+              .where("matchId")
+              .equals(matchId)
+              .return.first();
 
-                await fancyRepository.save(`${matchId}-${fancy.SelectionId}`, {
-                  ...fancy,
-                  matchId: +matchId,
+            if (matchData) {
+              matchData.matchId = matchId;
+              matchRepository.save(matchData);
+            } else {
+              await matchRepository.save(matchId.toString(), {
+                matchId: matchId,
+                type: "t10",
+              });
+            }
+          });
+
+          T10MatchIds.map((matchId: string) => {
+            api
+              .get(`get-sessions-t10?MatchID=${matchId}`)
+              .then(async (res: any) => {
+                res.data.sports.map(async (fancy: any) => {
+                  const fancyData = await fancyRepository
+                    .search()
+                    .where("matchId")
+                    .equals(matchId)
+                    .where("SelectionId")
+                    .equals(fancy.SelectionId)
+                    .return.first();
+
+                  if (fancyData) {
+                    fancyRepository.save({
+                      ...fancy,
+                      ...fancyData,
+                    });
+                  } else {
+                    await fancyRepository.save(
+                      `${matchId}-${fancy.SelectionId}`,
+                      fancy
+                    );
+                  }
                 });
-              });
-            })
-            .catch(() => {});
-        });
-      }
-
-      if (T10MatchIds.length > 0) {
-        T10MatchIds.forEach(async (matchId: string) => {
-          const matchData = await matchRepository
-            .search()
-            .where("matchId")
-            .equals(matchId)
-            .return.first();
-
-          if (matchData) {
-            matchData.matchId = matchId;
-            matchRepository.save(matchData);
-          } else {
-            await matchRepository.save(matchId.toString(), {
-              matchId: matchId,
-              type: "t10",
-            });
-          }
-        });
-
-        T10MatchIds.map((matchId: string) => {
-          api
-            .get(`get-sessions-t10?MatchID=${matchId}`)
-            .then(async (res: any) => {
-              res.data.sports.map(async (fancy: any) => {
-                const fancyData = await fancyRepository
-                  .search()
-                  .where("matchId")
-                  .equals(matchId)
-                  .where("SelectionId")
-                  .equals(fancy.SelectionId)
-                  .return.first();
-
-                if (fancyData) {
-                  fancyRepository.save({
-                    ...fancy,
-                    ...fancyData,
-                  });
-                } else {
-                  await fancyRepository.save(
-                    `${matchId}-${fancy.SelectionId}`,
-                    fancy
-                  );
-                }
-              });
-            })
-            .catch(() => {});
-        });
-      }
+              })
+              .catch(() => {});
+          });
+        }
+      });
 
       return res.json({ success: true, message: "matches added" });
     } catch (e: Error | any) {

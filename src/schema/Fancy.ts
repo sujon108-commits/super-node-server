@@ -27,7 +27,7 @@ export const fancySchema = new Schema(
     rem: { type: "string" },
     ballsess: { type: "number" },
   },
-  { dataStructure: "JSON" }
+  { dataStructure: "HASH" }
 );
 
 export const fancyRepository = new Repository(fancySchema, redis);

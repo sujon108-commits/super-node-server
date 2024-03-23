@@ -5,19 +5,23 @@ export const marketSchema = new Schema(
   "Market",
   {
     marketId: { type: "string", sortable: true },
-    marketName: { type: "string" },
-    market: { type: "string" },
-    markettype: { type: "string" },
-    status: { type: "string" },
+    marketName: { type: "string", sortable: true },
+    market: { type: "string", sortable: true },
+    markettype: { type: "string", sortable: true },
+    status: { type: "string", sortable: true },
     matchId: { type: "number", sortable: true },
-    active: { type: "boolean" },
-    inplay: { type: "boolean" },
-    isDelete: { type: "boolean" },
-    marketStartTime: { type: "string" },
-    oddsType: { type: "string" },
-    runners: { type: "string[]", path: "$.runners[*].selectionId" },
+    active: { type: "boolean", sortable: true },
+    inplay: { type: "boolean", sortable: true },
+    isDelete: { type: "boolean", sortable: true },
+    marketStartTime: { type: "string", sortable: true },
+    oddsType: { type: "string", sortable: true },
+    runners: {
+      type: "string[]",
+      path: "$.runners[*].selectionId",
+      sortable: true,
+    },
   },
-  { dataStructure: "JSON" }
+  { dataStructure: "HASH" }
 );
 
 export const marketRepository = new Repository(marketSchema, redis);

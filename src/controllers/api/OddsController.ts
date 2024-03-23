@@ -214,22 +214,27 @@ class OddsController {
     res: Response
   ): Promise<Response> {
     try {
-      const { EventID } = req.query;
+      const { EventID, sportId } = req.query;
       if (!EventID) throw Error("EventID is required field");
+      if (!sportId) throw Error("sportId is required field");
 
       let matchList = [];
       if (req.originalUrl.includes("get-marketes-t10")) {
         const data = await redisReplica.get(`getMarketList-bm-${EventID}`);
         if (data) matchList = JSON.parse(data);
         if (!data) {
-          const res = await api.get(`/get-marketes-t10?EventID=${EventID}`);
+          const res = await api.get(
+            `/get-marketes-t10?sportId=${sportId}&EventID=${EventID}`
+          );
           matchList = res.data.sports;
         }
       } else if (req.originalUrl.includes("get-marketes")) {
         const data = await redisReplica.get(`getMarketList-${EventID}`);
         if (data) matchList = JSON.parse(data);
         if (!data) {
-          const res = await api.get(`/get-marketes?EventID=${EventID}`);
+          const res = await api.get(
+            `/get-marketes?sportId=${sportId}&EventID=${EventID}`
+          );
           matchList = res.data.sports;
         }
       } else if (req.originalUrl.includes("get-bookmaker-marketes")) {
@@ -237,7 +242,7 @@ class OddsController {
         if (data) matchList = JSON.parse(data);
         if (!data) {
           const res = await api.get(
-            `/get-bookmaker-marketes?EventID=${EventID}`
+            `/get-bookmaker-marketes?sportId=${sportId}&EventID=${EventID}`
           );
           matchList = res.data.sports;
         }
