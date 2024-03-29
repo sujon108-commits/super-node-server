@@ -90,18 +90,14 @@ class OddSocket {
 
     this.socket.on("joinMarketRoom", async (room) => {
       this.socket.join(room);
-      const market = await marketRepository
-        .search()
-        .where("marketId")
-        .eq(room)
-        .return.first();
+      const redisMarket: any = await redisReplica.get(`odds-market-${room}`);
 
-      if (market) {
-        //@ts-expect-error
-        const marketData = OddSocket.convertDataToMarket(market as IMarket);
+      if (redisMarket) {
+        const mData = JSON.parse(redisMarket);
+        const marketData = OddSocket.convertDataToMarket(mData as IMarket);
 
-        this.io.to(market.marketId).emit("getMarketData", {
-          ...market,
+        this.io.to(mData.marketId).emit("getMarketData", {
+          ...mData,
           runners: marketData,
         });
       }
