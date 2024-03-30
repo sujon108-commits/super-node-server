@@ -49,4 +49,15 @@ const marketFormatter = (t2: any, marketJson: any) => {
   return finalDataArray;
 };
 
-export { marketFormatter };
+function getParameters(url: string) {
+  const urlArray = url.split("?");
+  const searchParams = new URLSearchParams(urlArray[1]);
+  const paramsArray = [];
+
+  for (const [key, value] of searchParams.entries()) {
+    paramsArray.push({ key, value });
+  }
+  return paramsArray;
+}
+
+export { marketFormatter, getParameters };

@@ -13,7 +13,7 @@ export default class OddsController {
   constructor() {
     try {
       this.io = Websocket.getInstance();
-      //this.saveMarkets();
+      this.saveMarkets();
       //this.saveFancies();
 
       const io = Websocket.getInstance();
@@ -70,7 +70,7 @@ export default class OddsController {
                   ...market,
                   ...marketData,
                 });
-                marketData.runners = convertedData;
+                marketData.runners = JSON.stringify(convertedData);
                 // if (!_.isEqual(market.runners, marketData.runners)) {
                 this.io.to(market.matchId).emit("getMarketData", {
                   ...market,
@@ -86,11 +86,10 @@ export default class OddsController {
                   ...marketData,
                 });
                 // }
-                // code commented
-                // await marketRepository.save(market.marketId, {
-                //   ...market,
-                //   ...marketData,
-                // });
+                await marketRepository.save(market.marketId, {
+                  ...market,
+                  ...marketData,
+                });
               }
             })
             .catch(console.log);

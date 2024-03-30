@@ -1,10 +1,7 @@
 import { Socket } from "socket.io";
-import MatchController from "../controllers/api/MatchController";
-import Websocket from "./Socket";
-import { IMarket, IRunnerType } from "../interfaces/MarketModel";
-import { marketRepository } from "../schema/Market";
-import { fancyRepository } from "../schema/Fancy";
 import { redisReplica } from "../database/redis";
+import { IMarket, IRunnerType } from "../interfaces/MarketModel";
+import Websocket from "./Socket";
 const checkOddsLength = 3;
 class OddSocket {
   io: any;
@@ -22,11 +19,6 @@ class OddSocket {
       this.socket.join(matchId);
 
       this.socket.join(matchId);
-      // const markets = await marketRepository
-      //   .search()
-      //   .where("matchId")
-      //   .eq(matchId)
-      //   .return.all();
 
       const markets: any = await redisReplica.json.get("matchesMarket", {
         path: matchId,

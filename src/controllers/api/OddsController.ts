@@ -409,7 +409,7 @@ class OddsController {
 
       const marketsOdds = markets.map((market) => {
         //@ts-expect-error
-        const marketData = OddSocket.convertDataToMarket(market as IMarket);
+        const marketData = JSON.parse(market.runners);
 
         return {
           ...market,

@@ -16,7 +16,7 @@ export const marketSchema = new Schema(
     marketStartTime: { type: "string", sortable: true },
     oddsType: { type: "string", sortable: true },
     runners: {
-      type: "string[]",
+      type: "string",
       path: "$.runners[*].selectionId",
       sortable: true,
     },

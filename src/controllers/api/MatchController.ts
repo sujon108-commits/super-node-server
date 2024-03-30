@@ -8,6 +8,7 @@ import { matchRepository } from "../../schema/Match";
 import api from "../../utils/api";
 import Websocket from "../../sockets/Socket";
 import { eventJson } from "../../utils/casino-types";
+import { getParameters } from "../../utils/helper";
 
 class MatchController {
   public static async addMatchAndMarket(
@@ -66,7 +67,6 @@ class MatchController {
             otherMatchIds,
             `get-marketes?sportId=${sportId}&EventID=`
           );
-
           const bookMarketsData = MatchController.marketsData(
             otherMatchIds,
             `get-bookmaker-marketes?sportId=${sportId}&EventID=`
@@ -200,11 +200,13 @@ class MatchController {
         .all(requests)
         .then((responses) => {
           const matches = responses.reduce((acc: any, res: any) => {
-            acc[res.config.url?.split("=")[1]] = res.data.sports.map(
+            const params = getParameters(res.config.url);
+
+            acc[params[1].value] = res.data.sports.map(
               ({ marketId, marketName, event }: any) => ({
                 marketId,
                 marketName,
-                matchId: +event?.id || +res.config.url?.split("=")[1],
+                matchId: +event?.id || +params[1].value,
                 oddsType: url.includes("bookmaker") ? "BM" : "M",
               })
             );
