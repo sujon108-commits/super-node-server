@@ -14,7 +14,7 @@ export default class OddsController {
     try {
       this.io = Websocket.getInstance();
       this.saveMarkets();
-      //this.saveFancies();
+      this.saveFancies();
 
       const io = Websocket.getInstance();
 
@@ -81,15 +81,15 @@ export default class OddsController {
                   ...marketData,
                 });
 
-                this.io.to("getMarkets").emit("getMarketData", {
-                  ...market,
-                  ...marketData,
-                });
+                // this.io.to("getMarkets").emit("getMarketData", {
+                //   ...market,
+                //   ...marketData,
+                // });
                 // }
-                await marketRepository.save(market.marketId, {
-                  ...market,
-                  ...marketData,
-                });
+                // await marketRepository.save(market.marketId, {
+                //   ...market,
+                //   ...marketData,
+                // });
               }
             })
             .catch(console.log);
@@ -135,33 +135,33 @@ export default class OddsController {
                     ...fancyRedis,
                     ...fancy,
                   });
-                  this.io.to(matchId).emit("getFancyData", {
+                  this.io.to(`${matchId}-fancy`).emit("getFancyData", {
                     ...fancyRedis,
                     ...fancy,
                   });
 
-                  this.io.to(matchId).emit("getFancyData-new", {
+                  this.io.to(`${matchId}-fancy`).emit("getFancyData-new", {
                     ...fancy,
                     ...fancyData,
                     marketId: `${matchId}-${fancy.SelectionId}`,
                   });
 
-                  this.io.to("getMarkets").emit("getFancyData", {
-                    ...fancyRedis,
-                    ...fancy,
-                  });
+                  // this.io.to("getMarkets").emit("getFancyData", {
+                  //   ...fancyRedis,
+                  //   ...fancy,
+                  // });
 
-                  this.io.to("getMarkets").emit("getFancyData-new", {
-                    ...fancy,
-                    ...fancyData,
-                    marketId: `${matchId}-${fancy.SelectionId}`,
-                  });
+                  // this.io.to("getMarkets").emit("getFancyData-new", {
+                  //   ...fancy,
+                  //   ...fancyData,
+                  //   marketId: `${matchId}-${fancy.SelectionId}`,
+                  // });
                 }
 
-                await fancyRepository.save(`${matchId}-${fancy.SelectionId}`, {
-                  ...fancy,
-                  matchId: +matchId,
-                });
+                // await fancyRepository.save(`${matchId}-${fancy.SelectionId}`, {
+                //   ...fancy,
+                //   matchId: +matchId,
+                // });
               });
             }
           });
