@@ -26,21 +26,25 @@ class App {
     "http://localhost:3000",
     "http://localhost:3025",
     "http://localhost:3001",
-    "https://batmagic.club",
+    // "https://batmagic.club",
     "https://win2c.com",
+    "https://api.vapbetting.com",
   ];
 
   allowedIps = [
     "143.110.183.41", //sap
     "174.138.120.77", //sap
-    "65.0.232.211", // batmagic
-    "172.31.34.130", // batmagic
+    //"65.0.232.211", // batmagic
+    //"172.31.34.130", // batmagic
     "81.16.28.169", // vapbetting
     "2a02:4780:d:ba3b::1", // vapbetting
     "139.59.0.175", // setbet247
     "64.225.86.229", // setbet247
     "172.31.2.243", //win2c
     "13.200.232.130", //win2c
+    "18.169.46.99", //api.vapbetting
+    "172.31.27.171", //api.vapbetting
+    "154.26.131.243",
   ];
 
   constructor() {
