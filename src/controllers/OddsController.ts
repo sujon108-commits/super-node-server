@@ -70,7 +70,6 @@ export default class OddsController {
                   ...market,
                   ...marketData,
                 });
-                marketData.runners = JSON.stringify(convertedData);
                 // if (!_.isEqual(market.runners, marketData.runners)) {
                 this.io.to(market.matchId).emit("getMarketData", {
                   ...market,
@@ -86,6 +85,8 @@ export default class OddsController {
                 //   ...marketData,
                 // });
                 // }
+                marketData.runners = convertedData;
+
                 // await marketRepository.save(market.marketId, {
                 //   ...market,
                 //   ...marketData,
