@@ -103,9 +103,9 @@ class OddsController {
       let response: any = await redisReplica.get(`fancy-${MatchID}`);
 
       response = response ? { data: JSON.parse(response) } : { data: [] };
-      const market = response.data.filter(
-        (m: any) => m.SelectionId == SelectionId
-      );
+      const market = response.data
+        .filter((m: any) => m.SelectionId == SelectionId)
+        .filter((m: any) => m.gtype === "session" || m.gtype === "fancy1");
 
       return res.json({
         sports: market,

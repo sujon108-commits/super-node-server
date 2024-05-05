@@ -27,7 +27,7 @@ class App {
     "http://localhost:3025",
     "http://localhost:3001",
     // "https://batmagic.club",
-    "https://win2c.com",
+    //"https://win2c.com",
     "https://api.vapbetting.com",
   ];
 
@@ -40,8 +40,8 @@ class App {
     "2a02:4780:d:ba3b::1", // vapbetting
     "139.59.0.175", // setbet247
     "64.225.86.229", // setbet247
-    "172.31.2.243", //win2c
-    "13.200.232.130", //win2c
+    //"172.31.2.243", //win2c
+    //"13.200.232.130", //win2c
     "18.169.46.99", //api.vapbetting
     "172.31.27.171", //api.vapbetting
     "154.26.131.243",
