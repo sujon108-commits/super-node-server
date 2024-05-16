@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://206.189.24.117:3005/api/",
+  baseURL: `${process.env.SUPER_NODE_URL!}/api/`,
   timeout: 10000,
 });
 

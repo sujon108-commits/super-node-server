@@ -115,7 +115,7 @@ export default class OddsController {
                   min: +fancy.min,
                   max: +fancy.max,
                   sr_no: +fancy.sr_no,
-                  ballsess: +fancy.ballsess,
+                  ballsess: +fancy.ballsess || 1,
                 };
                 const fancyRedis = await fancyRepository.fetch(
                   `${matchId}-${fancy.SelectionId}`

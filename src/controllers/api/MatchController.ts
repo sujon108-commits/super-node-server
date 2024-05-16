@@ -115,7 +115,7 @@ class MatchController {
                       min: +fancy.min,
                       max: +fancy.max,
                       sr_no: +fancy.sr_no,
-                      ballsess: +fancy.ballsess,
+                      ballsess: +fancy.ballsess || 1,
                     };
 
                     await fancyRepository.save(
