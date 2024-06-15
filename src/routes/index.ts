@@ -25,6 +25,7 @@ router.get("/market-data", OddsController.marketData);
 router.get("/get-odds-single", OddsController.getMakerOddsSingle);
 router.get("/get-series-redis/:sportsId", OddsController.getSeriesListRedis);
 router.get("/get-odds-result", OddsController.getResults);
+router.get("/get-odds-redis", OddsController.getOddsByRedis);
 
 router.get("/get-casino-market/:type", new CasinoController().getCasinoMarket);
 router.get(

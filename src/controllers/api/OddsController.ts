@@ -427,5 +427,32 @@ class OddsController {
       });
     }
   }
+
+  public static async getOddsByRedis(
+    req: Request,
+    res: Response
+  ): Promise<Response> {
+    try {
+      const { marketIds }: any = req.query;
+      if (!marketIds) throw Error("marketIds is required field");
+
+      const markets = marketIds.split(",");
+
+      const marketResponses = markets.map(async (marketId: string) => {
+        let response: any = await redisReplica.get(`odds-market-${marketId}`);
+        return response ? JSON.parse(response) : null;
+      });
+
+      return Promise.all(marketResponses).then((odds) => {
+        return res.json({
+          odds,
+        });
+      });
+    } catch (e: any) {
+      return res.json({
+        error: e.message,
+      });
+    }
+  }
 }
 export default OddsController;
