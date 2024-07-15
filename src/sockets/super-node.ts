@@ -22,7 +22,7 @@ export function SuperNodeSocket() {
 
   socket.on("getFancyData", (fancy) => {
     const fancyData = MatchController.createFancyDataAsMarket(fancy);
-    clientIo.to(fancy.matchId).emit("getFancyData-new", fancyData);
+    clientIo.to(fancy.matchId).emit("getFancyData", fancyData);
   });
 
   socket.on("deactivateFancy-Super", (fancy) => {
