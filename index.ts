@@ -40,6 +40,18 @@ if (cluster.isMaster) {
       ...market,
     });
   });
+
+  redisReplica.subscribe("getFancyData", (m: any) => {
+    const market = JSON.parse(m);
+
+    io.to(market.matchId).emit("getFancyData", {
+      ...market,
+    });
+
+    io.to(market.matchId).emit("getFancyData-new", {
+      ...market,
+    });
+  });
 } else {
   App.loadServer();
   process.on("unhandledRejection", (e) => {});
