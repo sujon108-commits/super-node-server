@@ -46,38 +46,7 @@ class OddSocket {
           });
         });
       }
-
-      // const fancies = await fancyRepository
-      //   .search()
-      //   .where("matchId")
-      //   .eq(matchId)
-      //   .return.all();
-
-      // if (fancies.length > 0) {
-      //   fancies.map((fancy: any) => {
-      //     const fancyData = MatchController.createFancyDataAsMarket(fancy);
-
-      //     this.io.to("getMarkets").emit("getFancyData", {
-      //       ...fancy,
-      //     });
-
-      //     this.socket.emit("getFancyData", {
-      //       ...fancy,
-      //     });
-
-      //     this.io.to("getMarkets").emit("getFancyData-new", {
-      //       ...fancy,
-      //       ...fancyData,
-      //       marketId: `${matchId}-${fancy.SelectionId}`,
-      //     });
-
-      //     this.socket.emit("getFancyData-new", {
-      //       ...fancy,
-      //       ...fancyData,
-      //       marketId: `${matchId}-${fancy.SelectionId}`,
-      //     });
-      //   });
-      // }
+      //const fancyData = MatchController.createFancyDataAsMarket(fancy);
     });
 
     this.socket.on("joinMarketRoom", async (room) => {

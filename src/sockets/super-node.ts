@@ -1,8 +1,7 @@
 import { io } from "socket.io-client";
 import axios from "axios";
 import Websocket from "./Socket";
-import { fancyRepository } from "../schema/Fancy";
-import { matchRepository } from "../schema/Match";
+import MatchController from "../controllers/api/MatchController";
 const socket = io(process.env.SUPER_NODE_URL!, {
   transports: ["websocket"],
 });
@@ -21,11 +20,16 @@ export function SuperNodeSocket() {
 
   socket.on("getMarketData-Super", (market) => {});
 
+  socket.on("getFancyData", (fancy) => {
+    const fancyData = MatchController.createFancyDataAsMarket(fancy);
+    clientIo.to(fancy.matchId).emit("getFancyData-new", fancyData);
+  });
+
   socket.on("deactivateFancy-Super", (fancy) => {
     if (Object.keys(fancy).length > 0) {
       Object.keys(fancy).map((matchId) => {
         fancy[matchId].map(async (marketId: any) => {
-          await fancyRepository.remove(`${matchId}-${marketId}`);
+          // remove fancy here
         });
       });
 
@@ -37,7 +41,6 @@ export function SuperNodeSocket() {
     try {
       if (marketData.type == "t10") {
         console.log("t10 matches", marketData);
-        await matchRepository.remove(marketData.matchId);
       } else {
         axios
           .post(`${process.env.SITE_URL}/api/delete-market`, {
