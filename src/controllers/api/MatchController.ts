@@ -70,6 +70,7 @@ class MatchController {
     }
 
     return {
+      marketId: data.matchId + "-" + data.SelectionId,
       marketName: data.RunnerName,
       runners,
       oddsType: IMarketType.F,
