@@ -1,7 +1,6 @@
 import cors from "cors";
 import express, { Express, NextFunction, Request, Response } from "express";
 import { createServer, Server } from "http";
-import OddsController from "./controllers/OddsController";
 import "./database/redis";
 import router from "./routes";
 import "./sockets/super-node";
@@ -87,7 +86,6 @@ class App {
 
     SuperNodeSocket();
     initCasinoSocket();
-    new OddsController();
 
     this.server.listen(this.port, () => {
       console.log(
