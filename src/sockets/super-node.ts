@@ -2,7 +2,9 @@ import { io } from "socket.io-client";
 import axios from "axios";
 import Websocket from "./Socket";
 import MatchController from "../controllers/api/MatchController";
-import { redisReplica } from "../database/redis";
+import { redisReplicaSub } from "../database/redis";
+import OddSocket from "./OddSocket";
+import { IMarket } from "../interfaces/MarketModel";
 const socket = io(process.env.SUPER_NODE_URL!, {
   transports: ["websocket"],
 });
@@ -57,15 +59,19 @@ export function SuperNodeSocket() {
     }
   });
 
-  redisReplica.subscribe("getMarketData", (m: any) => {
+  redisReplicaSub.subscribe("getMarketData", (m: any) => {
     const market = JSON.parse(m);
 
-    clientIo.to(market.matchId).emit("getMarketData", {
+    const marketData = OddSocket.convertDataToMarket(market as IMarket);
+
+    clientIo.to(market.marketId).emit("getMarketData", {
       ...market,
+      runners: marketData,
     });
 
     clientIo.to(market.marketId).emit("getMarketData", {
       ...market,
+      runners: marketData,
     });
   });
 }
