@@ -28,6 +28,7 @@ class App {
   allowedIps = [
     "35.177.21.254", //sap
     "172.31.29.22", //sap
+    "::ffff:127.0.0.1"
   ];
 
   constructor() {
@@ -90,6 +91,7 @@ class App {
       console.log(clientIp);
     }
     console.log(clientIp, "clientIpclientIpclientIp");
+    console.log(origin, "originoriginoriginorigin");
 
     const isWhiteListedIp = this.allowedIps.some((allowedIps) =>
       allowedIps.includes(clientIp!)
