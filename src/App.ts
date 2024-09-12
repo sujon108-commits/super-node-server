@@ -89,6 +89,8 @@ class App {
     if (!origin) {
       console.log(clientIp);
     }
+    console.log(clientIp);
+
     const isWhiteListedIp = this.allowedIps.some((allowedIps) =>
       allowedIps.includes(clientIp!)
     );
