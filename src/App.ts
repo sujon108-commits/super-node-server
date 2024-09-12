@@ -17,33 +17,16 @@ class App {
   port: string | undefined;
   server: Server | undefined;
   allowedOrigin = [
-    "https://marketapi.store",
-    "https://saphiregames.com",
-    "https://setbet247.com",
-    "https://vapbetting.com",
+    "https://diamondecxh99.com",
     "http://localhost",
     "http://localhost:3000",
     "http://localhost:3025",
     "http://localhost:3001",
-    // "https://batmagic.club",
-    //"https://win2c.com",
-    "https://api.vapbetting.com",
   ];
 
   allowedIps = [
-    "143.110.183.41", //sap
-    "174.138.120.77", //sap
-    //"65.0.232.211", // batmagic
-    //"172.31.34.130", // batmagic
-    "81.16.28.169", // vapbetting
-    "2a02:4780:d:ba3b::1", // vapbetting
-    "139.59.0.175", // setbet247
-    "64.225.86.229", // setbet247
-    //"172.31.2.243", //win2c
-    //"13.200.232.130", //win2c
-    "18.169.46.99", //api.vapbetting
-    "172.31.27.171", //api.vapbetting
-    "154.26.131.243",
+    "35.177.21.254", //sap
+    "172.31.29.22", //sap
   ];
 
   constructor() {
