@@ -22,6 +22,7 @@ class App {
     "http://localhost:3000",
     "http://localhost:3025",
     "http://localhost:3001",
+    "http://localhost:3010",
   ];
 
   allowedIps = [
