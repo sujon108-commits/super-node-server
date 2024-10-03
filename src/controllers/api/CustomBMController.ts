@@ -4,7 +4,7 @@ import { redisReplica } from "../../database/redis";
 class CustomBMController {
   public static async saveBM(req: Request, res: Response): Promise<Response> {
     try {
-      const obj = { marketId: "" };
+      const obj = { ...req.body };
       await redisReplica.set(
         `odds-market-${obj.marketId}`,
         JSON.stringify(obj),
