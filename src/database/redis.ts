@@ -11,6 +11,18 @@ redisReplica.on("connect", () => console.log("Redis connected"));
   await redisReplicaSub.connect();
 })();
 
+export const redisSuperNode = createClient({
+  url: process.env.REDIS_URL_SUPER_NODE_FOR_BM,
+});
+
+redisSuperNode.on("error", (err) =>
+  console.log("redisSuperNode Client Error:===", err)
+);
+redisSuperNode.on("connect", () => console.log("redisSuperNode connected"));
+(async () => {
+  await redisSuperNode.connect();
+})();
+
 const redis = createClient({
   url: process.env.REDIS_URL || "redis://localhost:6379",
 });
