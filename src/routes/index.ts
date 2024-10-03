@@ -2,6 +2,7 @@ import { Router } from "express";
 import MatchController from "../controllers/api/MatchController";
 import OddsController from "../controllers/api/OddsController";
 import CasinoController from "../controllers/api/CasinoController";
+import CustomBMController from "../controllers/api/CustomBMController";
 
 const router = Router();
 router.post("/save-match", MatchController.addMatchAndMarket);
@@ -30,5 +31,7 @@ router.get(
   "/get-single-market/:type/:selectionId",
   new CasinoController().getSingleMarket
 );
+
+router.post("/save-custom-bm", CustomBMController.saveBM);
 
 export default router;

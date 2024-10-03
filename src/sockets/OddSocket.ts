@@ -74,14 +74,15 @@ class OddSocket {
 
     return marketData?.runners?.map(
       ({ selectionId, ex, status, ...restRunner }: IRunnerType) => {
-        const backLength = checkOddsLength - ex?.availableToBack?.length! ?? 0;
+        const backLength =
+          checkOddsLength - (ex?.availableToBack?.length! ?? 0);
         if (backLength) {
           for (let k = 0; k < backLength; k++) {
             ex?.availableToBack.push({ price: "-", size: "-" });
           }
         }
 
-        const layLength = checkOddsLength - ex?.availableToLay?.length! ?? 0;
+        const layLength = checkOddsLength - (ex?.availableToLay?.length! ?? 0);
         if (layLength) {
           for (let k = 0; k < layLength; k++) {
             ex?.availableToLay.push({ price: "-", size: "-" });
